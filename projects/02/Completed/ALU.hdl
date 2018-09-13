@@ -43,4 +43,37 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+   
+   // zero the x input
+   Mux16(a = x, b = false, sel = zx, out = zeroXResult);
+   
+   // negate the x input
+   Not16(in = zeroXResult, out = notZeroXResult);
+   Mux16(a = zeroXResult, b = notZeroXResult, sel = nx, out = negateXResult);
+   
+   // zero the y input
+   Mux16(a = y, b = false, sel = zy, out = zeroYResult);
+   
+   // negate the y input
+   Not16(in = zeroYResult, out = notZeroYResult);
+   Mux16(a = zeroYResult, b = notZeroYResult, sel = ny, out = negateYResult);
+   
+   // compute out = x + y (if 1) or x & y (if 0)
+   And16(a = negateXResult, b = negateYResult, out = xAndY);
+   Add16(a = negateXResult, b = negateYResult, out = xPlusY);
+   
+   Mux16(a = xAndY, b = xPlusY, sel = f, out = fResult);
+   
+   // negate the output
+   Not16(in = fResult, out = notFResult);
+   
+   Mux16(a = fResult, b = notFResult, sel = no, out[0..7] = out0to7, out[8..15] = out8to15, out[15] = ng, out = out);
+   
+   // set status zr
+   Or8Way(in = out0to7, out = or8wayout0);
+   Or8Way(in = out8to15, out = or8wayout1);
+   Or(a = or8wayout0, b = or8wayout1, out = orout0);
+   
+   Not(in = orout0, out = zr);
+   
 }
