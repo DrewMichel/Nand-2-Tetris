@@ -14,4 +14,15 @@ CHIP FullAdder {
 
     PARTS:
     // Put you code here:
+    
+    // Tier 1
+    Xor(a = a, b = b, out = xorout0);
+    And(a = a, b = b, out = andout0);
+    
+    // Tier 2
+    Xor(a = xorout0, b = c, out = sum);
+    And(a = xorout0, b = c, out = andout1);
+    
+    // Tier 3
+    Or(a = andout0, b = andout1, out = carry);
 }
