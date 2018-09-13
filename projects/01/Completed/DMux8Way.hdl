@@ -1,0 +1,48 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux8Way.hdl
+
+/**
+ * 8-way demultiplexor:
+ * {a, b, c, d, e, f, g, h} = {in, 0, 0, 0, 0, 0, 0, 0} if sel == 000 A
+ *                            {0, in, 0, 0, 0, 0, 0, 0} if sel == 001 B
+ *                            {0, 0, in, 0, 0, 0, 0, 0} if sel == 010 C
+ *                            {0, 0, 0, in, 0, 0, 0, 0} if sel == 011 D
+ *                            {0, 0, 0, 0, in, 0, 0, 0} if sel == 100 E
+ *                            {0, 0, 0, 0, 0, in, 0, 0} if sel == 101 F
+ *                            {0, 0, 0, 0, 0, 0, in, 0} if sel == 110 G
+ *                            {0, 0, 0, 0, 0, 0, 0, in} if sel == 111 H
+ * C - G estimated
+ */
+
+CHIP DMux8Way {
+    IN in, sel[3];
+    OUT a, b, c, d, e, f, g, h;
+
+    PARTS:
+    // Put your code here:
+    
+    // Tier 1
+    
+    // dmuxout00 can contain A, C, E, or G
+    // dmuxout01 can contain B, D, F, or H
+    DMux(in = in, sel = sel[0], a = dmuxout00, b = dmuxout01);
+    
+    // Tier 2
+    
+    // dmuxout02 can contain A or E
+    // dmuxout03 can contain C or G
+    DMux(in = dmuxout00, sel = sel[1], a = dmuxout02, b = dmuxout03);
+    
+    // dmuxout04 can contain B or F
+    // dmuxout05 can contain D or H
+    DMux(in = dmuxout01, sel = sel[1], a = dmuxout04, b = dmuxout05);
+    
+    // Tier 3
+    
+    DMux(in = dmuxout02, sel = sel[2], a = a, b = e);
+    DMux(in = dmuxout03, sel = sel[2], a = c, b = g);
+    DMux(in = dmuxout04, sel = sel[2], a = b, b = f);
+    DMux(in = dmuxout05, sel = sel[2], a = d, b = h);
+}

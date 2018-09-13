@@ -1,17 +1,17 @@
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
-// File name: projects/01/Or16.hdl
+// File name: projects/02/Adder16.hdl
 
 /**
- * 16-bit bitwise Or:
- * for i = 0..15 out[i] = (a[i] or b[i])
+ * Adds two 16-bit values.
+ * The most significant carry bit is ignored.
  */
 
-CHIP Or16 {
+CHIP Add16 {
     IN a[16], b[16];
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+   // Put you code here:
 }

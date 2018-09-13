@@ -17,4 +17,11 @@ CHIP DMux4Way {
 
     PARTS:
     // Put your code here:
+    
+    // Tier 1
+    DMux(in = in, sel = sel[0], a = dmuxout00, b = dmuxout01);
+    
+    // Tier 2
+    DMux(in = dmuxout00, sel = sel[1], a = a, b = c);
+    DMux(in = dmuxout01, sel = sel[1], a = b, b = d);
 }
