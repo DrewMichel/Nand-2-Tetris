@@ -1,0 +1,143 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Put your code here:
+    
+    // 1. Executes the inputted instruction according the
+    //      hack machine language specification
+    //
+    // 2. The D and A in the language specification refer to
+    //      CPU-resident registers, while M refers to the external
+    //      memory location addressed by A, i.e. to Memory[A]
+    //
+    // 3. The inM input holds the value of this location
+    //
+    // 4. If the current instruction needs to write a value to M,
+    //      the value is placed in outM, the address of the target
+    //      location is placed in the addressM output, and the writeM
+    //      control bit is asserted
+    //
+    // 5. (When writeM==0, any value may appear in outM)
+    //
+    // 6. The outM and writeM outputs are combinational: they are
+    //      affected instantaneously by the execution of the current instruction
+    //
+    // 7. The addressM and pc outputs are clocked: although
+    //      they are affected by the execution of the current
+    //      instruction, they commit to their new values only in the next time step.
+    //
+    // 8. If reset==1 then the CPU jumps to address 0
+    //      (i.e. pc is set to 0 in next time step) rather than to the address
+    //      resulting from executing the current instruction. 
+    
+    // instruction[0..2] jumps
+    // instruction[3..5] destination
+    // instruction[6..11] computation
+    // instruction[12] determine whether the ALU operates on A input or M input
+    // instruction[15] op code 0 for A instruction 1 for C instruction
+    
+    // Only difference between A & D Register chips and a
+    //      Register is a display in the GUI
+    
+    // Chapter 5, page 20, diagram 5.8 illustrates the basic setup and
+    //      chips required for the CPU
+    
+    // Not gate used to reverse instruction[15]
+    Not(in = instruction[15], out = aIn);
+    
+    // And gate used to determine if the ARegister should
+    // receive instruction or ALU's output
+    And(a = instruction[15], b = instruction[5], out = ALUtoA);
+    
+    // Mux16 gate used to set the ARegister's input
+    Mux16(a = instruction, b = ALUout, sel = ALUtoA, out = aRegisterInput);
+    
+    // Or gate used to determine if the ARegister should be
+    // loaded with a new value
+    Or(a = aIn, b = ALUtoA, out = loadARegisterOut);
+    
+    // ARegister used to store address
+    ARegister(in = aRegisterInput, load = loadARegisterOut, out = aRegisterOut, out[0..14] = addressM);
+    
+    // Mux16 gate used to determine if the ALU operates on A input or M input
+    Mux16(a = aRegisterOut, b = inM, sel = instruction[12], out = AMout);
+    
+    // And gate used to determine if the DRegister should be
+    // loaded with a new value
+    And(a = instruction[15], b = instruction[4], out = loadDRegisterOut);
+    
+    // DRegister used to store data
+    DRegister(in = ALUout, load = loadDRegisterOut, out = dRegisterOut);
+    
+    // ALU used to process DRegister output with either ARegister's output
+    // or inM's value using instructions
+    ALU(x = dRegisterOut, y = AMout, zx = instruction[11], nx = instruction[10],
+        zy = instruction[9], ny = instruction[8], f = instruction[7],
+        no = instruction[6], out = ALUout, zr = zeroResultOut, ng = negativeOut, out = outM);
+    
+    // And gate used to determine writeM's value
+    And(a = instruction[15], b = instruction[3], out = writeM);
+    
+    // And gate used to determine if an equal jump is valid
+    And(a = zeroResultOut, b = instruction[1], out = jumpEqualOut);
+    
+    // And gate used to determine if a less than jump is valid
+    And(a = negativeOut, b = instruction[2], out = jumpLessThanOut);
+    
+    // Or gate used to determine if the ALU output 0 or less
+    Or(a = zeroResultOut, b = negativeOut, out = zeroOrNegativeOut);
+    
+    // Not gate used to determine if the ALU output was 1 or greater
+    Not(in = zeroOrNegativeOut, out = positiveOut);
+    
+    // And gate used to determine if a greater than jump is valid
+    And(a = positiveOut, b = instruction[0], out = jumpGreaterThanOut);
+    
+    // 2 Or gates used to determine if a jump will occur
+    Or(a = jumpEqualOut, b = jumpLessThanOut, out = jumpLessThanOrEqualOut);
+    Or(a = jumpLessThanOrEqualOut, b = jumpGreaterThanOut, out = jumpToA);
+    
+    // And gate used to determine 
+    And(a = instruction[15], b = jumpToA, out = loadPC);
+    
+    // PC used to track program counter
+    PC(in = aRegisterOut, reset = reset, load = loadPC, inc = true, out[0..14] = pc);
+}
