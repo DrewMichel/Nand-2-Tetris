@@ -5,6 +5,8 @@
 
 import java.io.FileInputStream;
 import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.File;
 
 public class Parser
 {
@@ -13,10 +15,30 @@ public class Parser
     private String fileName;
     private Scanner fileScanner;
     
+    public Parser(File inputFile)
+    {
+        try
+        {
+            fileScanner = new Scanner(new FileInputStream(inputFile));
+            fileName = inputFile.getName();
+        }
+        catch(FileNotFoundException e)
+        {
+            System.err.println(e.getMessage());
+        }
+    }
+    
     public Parser(String inputFile)
     {
-        fileName = inputFile;
-        fileScanner = new Scanner(new FileInputStream(fileName));
+        try
+        {
+            fileScanner = new Scanner(new FileInputStream(inputFile));
+            fileName = inputFile;
+        }
+        catch(FileNotFoundException e)
+        {
+            System.err.println(e.getMessage());
+        }
     }
     
     // Returns true if the input contains more commands.

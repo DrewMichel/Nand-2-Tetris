@@ -20,7 +20,7 @@ public class SymbolTable
     // Methods
     
     // Adds a pair to the table
-    public boolean addEntry(String symbol, int address)
+    public void addEntry(String symbol, int address)
     {
         symbolMap.put(symbol, address);
     }
