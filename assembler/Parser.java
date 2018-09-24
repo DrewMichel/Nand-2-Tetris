@@ -14,6 +14,7 @@ public class Parser
     
     private String fileName;
     private Scanner fileScanner;
+    private Code singletonCode;
     
     public Parser(File inputFile)
     {
@@ -21,10 +22,12 @@ public class Parser
         {
             fileScanner = new Scanner(new FileInputStream(inputFile));
             fileName = inputFile.getName();
+            singletonCode = Code.getCode();
         }
         catch(FileNotFoundException e)
         {
             System.err.println(e.getMessage());
+            System.exit(0);
         }
     }
     
