@@ -57,6 +57,16 @@ public class Parser
         }
     }
     
+    public String getFileName()
+    {
+        return fileName;
+    }
+    
+    public String getOutName()
+    {
+        return outName;
+    }
+    
     public void setOutCommand(String out)
     {
         outCommand = out;
