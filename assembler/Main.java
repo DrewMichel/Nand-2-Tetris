@@ -16,7 +16,6 @@ public class Main
         System.out.println("Assembler Beginning");
         
         populateFlagMap();
-        Parser parser = null;
         
         ArrayList<File> regularFiles = new ArrayList<File>();
         
@@ -36,16 +35,96 @@ public class Main
         }
         */
         
-        /*
-        for(int i = 0; i < regularFiles.size(); i++)
-        {
-            parser = new Parser(regularFiles.get(i));
-        }
-        */
-        
-        // get parser working on a single file first before allowing multiple
+        System.out.println("Processing: " + regularFiles.size() + " files...");
+        processFiles(regularFiles);
         
         System.out.println("Assembler Ending");
+    }
+    
+    public static void processFiles(ArrayList<File> files)
+    {
+        Parser parser = null;
+        SymbolTable table = null;
+        
+        for(int i = 0; i < files.size(); i++)
+        {
+            parser = new Parser(files.get(i));
+            table = new SymbolTable();
+            
+            while(parser.getPassCounter() < 2)
+            {
+                // look for labels
+                if(parser.getPassCounter() == 0)
+                {
+                    while(parser.hasMoreCommands())
+                    {
+                        parser.advance();
+                        
+                        if(parser.commandType() == Parser.L_COMMAND && Parser.isValidSymbol(parser.symbol(parser.getCurrentCommand()))) // found label
+                        {
+                            table.addEntry(parser.symbol(parser.getCurrentCommand()), parser.getProgramCounter());
+                        }
+                    }
+                    
+                    parser.incrementPassCounter();
+                    parser.resetProgramCounter();
+                    parser.resetScanner();
+                }
+                else // process each line
+                {
+                    while(parser.hasMoreCommands())
+                    {
+                        parser.advance();
+                        
+                        parser.commandType();
+                        
+                        if(parser.getCurrentType() == Parser.A_COMMAND) // found A command
+                        {
+                            String currentSymbol = parser.symbol(parser.getCurrentCommand());
+                            
+                            boolean valid = Parser.isValidSymbol(currentSymbol);
+                            
+                            if(table.contains(currentSymbol))
+                            {
+                                parser.setOutCommand(Integer.toBinaryString(table.getAddress(currentSymbol)));
+                                
+                                parser.write();
+                            }
+                            else if(valid)
+                            {
+                                table.addEntry(currentSymbol, table.next());
+                                
+                                parser.setOutCommand(Parser.ensureLength(Integer.toBinaryString(table.getAddress(currentSymbol)), false));
+                                
+                                parser.write();
+                            }
+                            else if(Parser.onlyDigits(currentSymbol))
+                            {
+                                parser.setOutCommand(Parser.ensureLength(Integer.toBinaryString(Integer.parseInt(currentSymbol)), false));
+                                
+                                parser.write();
+                            }
+                            else
+                            {
+                                // just crash?
+                            }
+                        }
+                        else if(parser.getCurrentType() == Parser.C_COMMAND) // found C command
+                        {
+                            String dest = parser.dest(parser.getCurrentCommand()), comp = parser.comp(parser.getCurrentCommand()), jump = parser.jump(parser.getCurrentCommand());
+                            
+                            parser.setOutCommand(Code.MOST_SIGNIFICANT_BITS + comp + dest + jump);
+                            
+                            parser.write();
+                        }
+                    }
+                    
+                    parser.incrementPassCounter();
+                }
+            }
+            
+            parser.closeStream();
+        }
     }
     
     public static String receiveInput()

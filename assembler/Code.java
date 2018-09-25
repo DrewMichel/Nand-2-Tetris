@@ -6,6 +6,9 @@ public final class Code
 {
     private static Code singleton;
     
+    public static final String EQUALS_SYMBOL = "=", JUMP_SYMBOL = ";", MOST_SIGNIFICANT_BITS = "111";
+    public static final int BUS_WIDTH = 16;
+    
     // Instance variables
     private HashMap<String, String> destMap;
     private HashMap<String, String> compMap;
@@ -29,19 +32,39 @@ public final class Code
         return singleton;
     }
     
+    public boolean isCommand(String line)
+    {
+        return (line != null && (line.contains(EQUALS_SYMBOL)) || line.contains(JUMP_SYMBOL));
+    }
+    
+    public boolean isDestCommand(String line)
+    {
+        return destMap.containsKey(line);
+    }
+    
+    public boolean isCompCommand(String line)
+    {
+        return compMap.containsKey(line);
+    }
+    
+    public boolean isJumpCommand(String line)
+    {
+        return jumpMap.containsKey(line);
+    }
+    
     public String dest(String mnemonic)
     {
-        return null;
+        return destMap.get(mnemonic);
     }
     
     public String comp(String mnemonic)
     {
-        return null;
+        return compMap.get(mnemonic);
     }
     
     public String jump(String mnemonic)
     {
-        return null;
+        return jumpMap.get(mnemonic);
     }
     
     private void populateMaps()
