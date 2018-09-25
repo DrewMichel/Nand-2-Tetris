@@ -38,6 +38,7 @@ public class Main
         System.out.println("Processing: " + regularFiles.size() + " files...");
         processFiles(regularFiles);
         
+        System.out.println("Parsed: " + regularFiles.size() + " files");
         System.out.println("Assembler Ending");
     }
     
@@ -60,9 +61,19 @@ public class Main
                     {
                         parser.advance();
                         
-                        if(parser.commandType() == Parser.L_COMMAND && Parser.isValidSymbol(parser.symbol(parser.getCurrentCommand()))) // found label
+                        parser.commandType();
+                        
+                        if(parser.getCurrentType() == Parser.L_COMMAND && Parser.isValidSymbol(parser.symbol(parser.getCurrentCommand()))) // found label
                         {
+                            //parser.incrementProgramCounter();
+                            System.err.println(parser.getProgramCounter() + ": " + parser.getCurrentCommand());
+                            
                             table.addEntry(parser.symbol(parser.getCurrentCommand()), parser.getProgramCounter());
+                        }
+                        else if(parser.getCurrentType() == Parser.A_COMMAND || parser.getCurrentType() == Parser.C_COMMAND)
+                        {
+                            parser.incrementProgramCounter();
+                            System.err.println(parser.getProgramCounter() + ": " + parser.getCurrentCommand());
                         }
                     }
                     
@@ -84,9 +95,13 @@ public class Main
                             
                             boolean valid = Parser.isValidSymbol(currentSymbol);
                             
+                            parser.incrementProgramCounter();
+                            
+                            System.err.println("A COMMAND " + parser.symbol(parser.getCurrentCommand()) + " AT " + parser.getProgramCounter());
+                            
                             if(table.contains(currentSymbol))
                             {
-                                parser.setOutCommand(Integer.toBinaryString(table.getAddress(currentSymbol)));
+                                parser.setOutCommand(Parser.ensureLength(Integer.toBinaryString(table.getAddress(currentSymbol)), false));
                                 
                                 parser.write();
                             }
@@ -113,6 +128,10 @@ public class Main
                         {
                             String dest = parser.dest(parser.getCurrentCommand()), comp = parser.comp(parser.getCurrentCommand()), jump = parser.jump(parser.getCurrentCommand());
                             
+                            parser.incrementProgramCounter();
+                            
+                            System.err.println("C COMMAND " + parser.getCurrentCommand() + " AT " + parser.getProgramCounter());
+                            
                             parser.setOutCommand(Code.MOST_SIGNIFICANT_BITS + comp + dest + jump);
                             
                             parser.write();
@@ -121,7 +140,10 @@ public class Main
                     
                     parser.incrementPassCounter();
                 }
+                table.displayEntries();
             }
+            
+            System.out.println("Completed: file #" + (i + 1));
             
             parser.closeStream();
         }

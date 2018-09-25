@@ -2,6 +2,7 @@
 // symbolic labels and numeric addresses
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class SymbolTable
 {
@@ -68,5 +69,13 @@ public class SymbolTable
         symbolMap.put("ARG", 2);
         symbolMap.put("THIS", 3);
         symbolMap.put("THAT", 4);
+    }
+    
+    public void displayEntries()
+    {
+        for(Map.Entry<String, Integer> entry : symbolMap.entrySet())
+        {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
     }
 }

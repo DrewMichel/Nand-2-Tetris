@@ -34,7 +34,7 @@ public class Parser
             
             singletonCode = Code.getCode();
             currentType = UNKNOWN_COMMAND;
-            programCounter = -1;
+            resetProgramCounter();
             passCounter = 0;
         }
         catch(FileNotFoundException e)
@@ -95,7 +95,7 @@ public class Parser
     
     public void resetProgramCounter()
     {
-        programCounter = -1;
+        programCounter = 0;
     }
     
     public String getCurrentCommand()
@@ -106,6 +106,11 @@ public class Parser
     public int getProgramCounter()
     {
         return programCounter;
+    }
+    
+    public void incrementProgramCounter()
+    {
+        ++programCounter;
     }
     
     // Returns true if the input contains more commands.
@@ -120,7 +125,7 @@ public class Parser
     // Initially there is no current command.
     public void advance()
     {
-        programCounter++;
+        //programCounter++;
         
         currentCommand = fileScanner.nextLine();
         
@@ -189,7 +194,7 @@ public class Parser
     // Should be called only when commandType() is C_COMMAND.
     public String dest(String input)
     {
-        String output = "";
+        String output = "000";
         
         int index = -1;
         
@@ -206,13 +211,20 @@ public class Parser
     // Should be called only when commandType() is C_COMMAND.
     public String comp(String input)
     {
-        String output = "";
+        String output = "FALCMP";
         
         int index = -1;
         
-        if(input != null && ((index = input.indexOf(Code.EQUALS_SYMBOL)) > 0) && input.length() > index + 1)
+        if(input != null && input.length() > index + 1)
         {
-            output = singletonCode.comp(input.substring(index + 1));
+            if(((index = input.indexOf(Code.EQUALS_SYMBOL)) > 0))
+            {
+                output = singletonCode.comp(input.substring(index + 1));
+            }
+            else if(((index = input.indexOf(Code.JUMP_SYMBOL)) > 0))
+            {
+                output = singletonCode.comp(input.substring(0, index));
+            }
         }
         
         return output;
@@ -293,6 +305,7 @@ public class Parser
     
     public static String ensureLength(String original, boolean cCommand)
     {
+        
         if(original.length() >= Code.BUS_WIDTH)
         {
             return original;
