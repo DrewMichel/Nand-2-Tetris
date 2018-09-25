@@ -4,8 +4,10 @@ import java.util.HashMap;
 
 public final class Code
 {
+    // Singleton implementation
     private static Code singleton;
     
+    // Constants
     public static final String EQUALS_SYMBOL = "=", JUMP_SYMBOL = ";", MOST_SIGNIFICANT_BITS = "111";
     public static final int BUS_WIDTH = 16;
     
@@ -22,6 +24,7 @@ public final class Code
     
     // Methods
     
+    // Returns the singleton Code object and initializes it if necessary
     public static Code getCode()
     {
         if(singleton == null)
@@ -32,41 +35,55 @@ public final class Code
         return singleton;
     }
     
+    // Returns true if the current line is a C Command, else false
     public boolean isCommand(String line)
     {
         return (line != null && (line.contains(EQUALS_SYMBOL)) || line.contains(JUMP_SYMBOL));
     }
     
+    // Returns true if destMap contains the parameter String line as a key
+    // Otherwise, returns false;
     public boolean isDestCommand(String line)
     {
         return destMap.containsKey(line);
     }
     
+    // Returns true if compMap contains the parameter String line as a key
+    // Otherwise, returns false;
     public boolean isCompCommand(String line)
     {
         return compMap.containsKey(line);
     }
     
+    // Returns true if jumpMap contains the parameter String line as a key
+    // Otherwise, returns false;
     public boolean isJumpCommand(String line)
     {
         return jumpMap.containsKey(line);
     }
     
+    // Returns the String value associated with the parameter String mnemonic
+    // within destMap
     public String dest(String mnemonic)
     {
         return destMap.get(mnemonic);
     }
     
+    // Returns the String value associated with the parameter String mnemonic
+    // within compMap
     public String comp(String mnemonic)
     {
         return compMap.get(mnemonic);
     }
     
+    // Returns the String value associated with the parameter String mnemonic
+    // within jumpMap
     public String jump(String mnemonic)
     {
         return jumpMap.get(mnemonic);
     }
     
+    // Calls additional methods to populate all maps
     private void populateMaps()
     {
         populateDestMap();
@@ -74,6 +91,7 @@ public final class Code
         populateJumpMap();
     }
     
+    // Populates jumpMap with course defined presets
     private void populateJumpMap()
     {
         jumpMap = new HashMap<String, String>();
@@ -93,6 +111,7 @@ public final class Code
         jumpMap.put("JMP", "111");
     }
     
+    // Populates compMap with course defined presets
     private void populateCompMap()
     {
         compMap = new HashMap<String, String>();
@@ -152,6 +171,7 @@ public final class Code
         compMap.put("M|D", "1010101");
     }
     
+    // Populates destMap with course defined presets
     private void populateDestMap()
     {
         destMap = new HashMap<String, String>();

@@ -7,10 +7,16 @@ import java.util.HashMap;
 
 public class Main
 {
-    private static String[] ARGUMENT_FLAGS = {"-R"};
-    private static String[] VALID_EXTENSIONS = {".asm"};
+    // Constants
+    private final static String[] ARGUMENT_FLAGS = {"-R"};
+    private final static String[] VALID_EXTENSIONS = {".asm"};
+    
+    // Static members
     private static HashMap<String, Boolean> flagMap;
     
+    // Methods
+    
+    // Main method
     public static void main(String[] args)
     {
         System.out.println("Assembler Beginning");
@@ -19,22 +25,29 @@ public class Main
         
         ArrayList<File> regularFiles = new ArrayList<File>();
         
+        // Prompts user to enter arguments via Scanner if none were entered
+        // via command line
         if(args.length <= 1)
         {
-         
             System.out.print("Enter filepath: ");
             args = receiveInput().split(" ");
         }
         
+        // Adds files into ArrayList
         regularFiles = processArguments(regularFiles, args);
         
         System.out.println("Processing: " + regularFiles.size() + " files...");
+        
+        // Parses each file and creates a .hack for each one
         processFiles(regularFiles);
         
         System.out.println("Parsed: " + regularFiles.size() + " files");
         System.out.println("Assembler Ending");
     }
     
+    // Receives an ArrayList of type File
+    // Iterates over each file within the ArrayList and outputs a .hack
+    // file based on each file's contents
     public static void processFiles(ArrayList<File> files)
     {
         Parser parser = null;
@@ -58,14 +71,11 @@ public class Main
                         
                         if(parser.getCurrentType() == Parser.L_COMMAND && Parser.isValidSymbol(parser.symbol(parser.getCurrentCommand()))) // found label
                         {
-                            //System.err.println(parser.getProgramCounter() + ": " + parser.getCurrentCommand());
-                            
                             table.addEntry(parser.symbol(parser.getCurrentCommand()), parser.getProgramCounter());
                         }
                         else if(parser.getCurrentType() == Parser.A_COMMAND || parser.getCurrentType() == Parser.C_COMMAND)
                         {
                             parser.incrementProgramCounter();
-                            //System.err.println(parser.getProgramCounter() + ": " + parser.getCurrentCommand());
                         }
                     }
                     
@@ -88,8 +98,6 @@ public class Main
                             boolean valid = Parser.isValidSymbol(currentSymbol);
                             
                             parser.incrementProgramCounter();
-                            
-                            //System.err.println("A COMMAND " + parser.symbol(parser.getCurrentCommand()) + " AT " + parser.getProgramCounter());
                             
                             if(table.contains(currentSymbol))
                             {
@@ -122,8 +130,6 @@ public class Main
                             
                             parser.incrementProgramCounter();
                             
-                            //System.err.println("C COMMAND " + parser.getCurrentCommand() + " AT " + parser.getProgramCounter());
-                            
                             parser.setOutCommand(Code.MOST_SIGNIFICANT_BITS + comp + dest + jump);
                             
                             parser.write();
@@ -132,8 +138,6 @@ public class Main
                     
                     parser.incrementPassCounter();
                 }
-                
-                //table.displayEntries();
             }
             
             System.out.println("Completed file #" + (i + 1));
@@ -142,14 +146,16 @@ public class Main
         }
     }
     
+    // Receives a line of input from the user and returns it
     public static String receiveInput()
     {
-        //Scanner scan = new Scanner(System.in);
-        //return scan.nextLine();
-        
         return new Scanner(System.in).nextLine();
     }
     
+    // Iterates over all files within the current directory level and adds them
+    // to an ArrayList of files. If the -R flag has been set, recursively
+    // adds all files within sub-folders.
+    // Returns the ArrayList of files.
     private static ArrayList<File> accessDirectoryFiles(ArrayList<File> directories, ArrayList<File> regularFiles)
     {
         ArrayList<File> innerDirectories = new ArrayList<File>();
@@ -179,6 +185,10 @@ public class Main
         return regularFiles;
     }
 
+    // Processes arguments to seperate valid elements into directories, files,
+    // or flags, then moves any files within directories into files. If -R
+    // flag has been set, Will recursively move all files within sub-folders.
+    // Returns an ArrayList containing files.
     private static ArrayList<File> processArguments(ArrayList<File> regularFiles, String[] arguments)
     {
         ArrayList<File> directories = new ArrayList<File>();
@@ -192,6 +202,8 @@ public class Main
         return regularFiles;
     }
     
+    // Processes arguments to separate valid elements into directories, files,
+    // or flags
     private static void processElements(ArrayList<File> directories, ArrayList<File> regularFiles, String[] arguments)
     {
         for(int i = 0; i < arguments.length; i++)
@@ -216,6 +228,8 @@ public class Main
         }
     }
     
+    // Iterates over String array parameter and uppercases each element
+    // Also returns the same array
     public static String[] toUpperCaseArray(String[] array)
     {
         if(array != null)
@@ -229,11 +243,8 @@ public class Main
         return array;
     }
     
-    private static boolean isFlag(File value)
-    {
-        return isFlag(value.getName());
-    }
-    
+    // Returns true if the File parameter value has a valid file extension
+    // Otherwise returns false
     private static boolean isValidExtension(File value)
     {
         String name = value.getName();
@@ -252,14 +263,21 @@ public class Main
         }
         
         return false;
-        
     }
     
-    private static boolean isFlag(String value)
+    // Returns true if flagMap contains the File parameter key as a key
+    private static boolean isFlag(File key)
     {
-        return flagMap.containsKey(value);
+        return isFlag(key.getName());
     }
     
+    // Returns true if flagMap contains the String parameter key as a key
+    private static boolean isFlag(String key)
+    {
+        return flagMap.containsKey(key);
+    }
+    
+    // Populates flagMap with argument flags as keys and each value as false
     private static HashMap<String, Boolean> populateFlagMap()
     {
         flagMap = new HashMap<String, Boolean>();

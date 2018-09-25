@@ -48,11 +48,14 @@ public class SymbolTable
         }
     }
     
+    // Returns the next valid address for a symbol and increments nextElement
+    // instance variable
     public int next()
     {
         return nextElement++;
     }
     
+    // Populates symbolMap with course defined presets
     private void populateSymbolMap()
     {
         symbolMap = new HashMap<String, Integer>();
@@ -71,6 +74,7 @@ public class SymbolTable
         symbolMap.put("THAT", 4);
     }
     
+    // Displays all key and value pairs stored in symbolMap instance variable
     public void displayEntries()
     {
         for(Map.Entry<String, Integer> entry : symbolMap.entrySet())

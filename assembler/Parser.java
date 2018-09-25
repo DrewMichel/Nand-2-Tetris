@@ -13,9 +13,11 @@ import java.io.IOException;
 
 public class Parser
 {
+    // Constants
     public static final char A_COMMAND = 'A', C_COMMAND = 'C', L_COMMAND = 'L', UNKNOWN_COMMAND = 'U';
     public static final String AT_ADDRESS = "@", LABEL_START = "(", LABEL_END = ")", PERIOD = ".", DEFAULT_EXTENSION = ".hack";
     
+    // Instance variables
     private String fileName, outName, currentCommand, outCommand;
     private Scanner fileScanner;
     private Code singletonCode;
@@ -23,6 +25,7 @@ public class Parser
     private int programCounter, passCounter;
     private PrintWriter outputFile;
     
+    // Constructor
     public Parser(File inputFile)
     {
         try
@@ -44,39 +47,57 @@ public class Parser
         }
     }
     
+    // Constructor
     public Parser(String inputFile)
     {
         try
         {
-            fileScanner = new Scanner(new FileInputStream(inputFile));
             fileName = inputFile;
+            fileScanner = new Scanner(new FileInputStream(fileName));
+            
+            outName = fileName.substring(0, fileName.lastIndexOf(PERIOD)) + DEFAULT_EXTENSION;
+            outputFile = new PrintWriter(outName);
+            
+            singletonCode = Code.getCode();
+            currentType = UNKNOWN_COMMAND;
+            resetProgramCounter();
+            passCounter = 0;
         }
         catch(FileNotFoundException e)
         {
-            System.err.println(e.getMessage());
+            System.err.println("Pass Counter: " + passCounter + "\n" + e.getMessage());
+            System.exit(0);
         }
     }
     
+    // Methods
+    
+    
+    // Returns fileName instance variable
     public String getFileName()
     {
         return fileName;
     }
     
+    // Returns outName instance variable
     public String getOutName()
     {
         return outName;
     }
     
+    // Sets outCommand instance variable to String parameter out
     public void setOutCommand(String out)
     {
         outCommand = out;
     }
     
+    // Causes the parser to write outCommand to file
     public void write()
     {
         outputFile.println(outCommand);
     }
     
+    // Resets the scanner to the beginning of the file
     public void resetScanner()
     {
         try
@@ -90,6 +111,7 @@ public class Parser
         }
     }
     
+    // Closes outputFile instance variable
     public void closeStream()
     {
         if(outputFile != null)
@@ -98,26 +120,31 @@ public class Parser
         }
     }
     
+    // Increments passCounter instance variable by one
     public void incrementPassCounter()
     {
         passCounter++;
     }
     
+    // Resets programCounter instance variable to zero
     public void resetProgramCounter()
     {
         programCounter = 0;
     }
     
+    // Returns currentCommand instance variable
     public String getCurrentCommand()
     {
         return currentCommand;
     }
     
+    // Returns programCounter instance variable
     public int getProgramCounter()
     {
         return programCounter;
     }
     
+    // Increments programCounter instance variable by one
     public void incrementProgramCounter()
     {
         ++programCounter;
@@ -135,8 +162,6 @@ public class Parser
     // Initially there is no current command.
     public void advance()
     {
-        //programCounter++;
-        
         currentCommand = fileScanner.nextLine();
         
         currentCommand = clearWhitespace(clearCommentation(currentCommand));
@@ -173,11 +198,13 @@ public class Parser
         return currentType;
     }
     
+    // Returns currentType instance variable
     public char getCurrentType()
     {
         return currentType;
     }
     
+    // Returns passCounter instance variable
     public int getPassCounter()
     {
         return passCounter;
@@ -257,6 +284,7 @@ public class Parser
         return output;
     }
     
+    // Removes commentation from the String parameter original and returns it
     public static String clearCommentation(String original)
     {
         String output = original;
@@ -269,6 +297,7 @@ public class Parser
         return output;
     }
     
+    // Removes whitespace from String parameter original and returns it
     public static String clearWhitespace(String original)
     {
         StringBuilder builder = new StringBuilder();
@@ -292,11 +321,16 @@ public class Parser
         return builder.toString();
     }
     
+    // Returns true if String parameter symbol's first character is alpha
+    // Otherwise, returns false
     public static boolean isValidSymbol(String symbol)
     {
         return (symbol != null && Character.isAlphabetic(symbol.charAt(0)));
     }
     
+    // Returns true if each character within String parameter symbol
+    // is a digit
+    // Otherwise, returns false
     public static boolean onlyDigits(String symbol)
     {
         if(symbol != null)
@@ -313,9 +347,13 @@ public class Parser
         return symbol.length() > 0;
     }
     
+    // Ensures that String parameter original is at minimum 16 character.
+    // If less than 16, prepends zeroes to the original's contents.
+    // If boolean parameter cCommand is true, prepends "111" before
+    // any zeroes
+    // Returns the original contents with any prepended characters
     public static String ensureLength(String original, boolean cCommand)
     {
-        
         if(original.length() >= Code.BUS_WIDTH)
         {
             return original;
