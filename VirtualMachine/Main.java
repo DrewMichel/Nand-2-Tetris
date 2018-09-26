@@ -106,8 +106,6 @@ public class Main
                         }
                         else if(filesInDirectory[i].isFile())
                         {
-                            System.out.println(filesInDirectory[i]);
-                            
                             files.add(filesInDirectory[i]);
                         }
                     }
@@ -146,13 +144,13 @@ public class Main
                         }
                         else if(filesInDirectory[i].isFile())
                         {
-                            System.out.println(filesInDirectory[i]);
-                            
                             files.add(filesInDirectory[i]);
                         }
                     } 
                 }
             }
+            
+            currentDirectories = null;
             
             addInnerDirectoryFiles(files, allDirectories, innerDirectories, flags);
         }
