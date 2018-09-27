@@ -13,6 +13,8 @@ public class CodeWriter
     private PrintWriter fileWriter;
     private String fileName;
     
+    private int stackPointer;
+    
     // Constructor
     public CodeWriter(File path)
     {
@@ -91,25 +93,26 @@ public class CodeWriter
         }
     }
     
-    // Writes the assembly code that is the translation
-    // of the given command, where command is either
-    // C_PUSH or C_POP.
-    public void writePushPop(String command, String segment, int index)
+    public void writeArithmetic()
     {
-        if(command.equals(CommandTable.C_POP))
-        {
-            //writePop();
-        }
-        else if(command.equals(CommandTable.C_PUSH))
-        {
-            //writePush();
-        }
-        else
-        {
-            // error
-        }
+        
     }
     
+    // Writes the assembly code that is the translation
+    // of the given command C_PUSH.
+    // Pushes the value from the segment's pointer + index onto the stack
+    public void writePush(String segment, int index)
+    {
+        
+    }
+    
+    // Writes the assembly code that is the translation
+    // of the given command C_POP.
+    // Pops value off the stack onto the segment's pointer + index.
+    public void writePop(String segment, int index)
+    {
+        
+    }
     
     // Closes the output file.
     public void close()

@@ -119,6 +119,19 @@ public class Parser
         return CommandTable.C_INVALID_TYPE;
     }
     
+    // Returns the segment argument of the current command
+    // Should be calledo nly if the current command
+    // is C_PUSH, C_POP, ...
+    public String segment()
+    {
+        if(currentCommand != null)
+        {
+            return currentCommand.split(" ")[1];
+        }
+        
+        return PointerTable.INVALID_POINTER;
+    }
+    
     // Returns the second argument of the current command.
     // Should be called only if the current command
     // is C_PUSH, C_POP, C_FUNCTION, or C_CALL.
@@ -126,24 +139,7 @@ public class Parser
     {
         if(currentCommand != null)
         {
-            int firstSpace = currentCommand.indexOf(" "), secondSpace = -1;
-            
-            if(firstSpace > -1)
-            {
-                String sub = currentCommand.substring(firstSpace + 1);
-                
-                secondSpace = sub.indexOf(" ");
-                
-                if(secondSpace > -1)
-                {
-                    sub = sub.substring(0, secondSpace);
-                }
-                
-                if(isDigits(sub))
-                {
-                    return Integer.parseInt(sub);
-                }
-            }
+            return Integer.parseInt(currentCommand.split(" ")[2]);
         }
         
         return INVALID_ARGUMENT_VALUE;

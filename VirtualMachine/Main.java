@@ -69,7 +69,14 @@ public class Main
                     {
                         codeWriter.writeArithmetic(parser.getCurrentCommand());
                     }
-                    else if(parser.getCurrentType().equals(CommandTable.C_))
+                    else if(parser.getCurrentType().equals(CommandTable.C_POP_TYPE))
+                    {
+                        codeWriter.writePop();
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_PUSH_TYPE))
+                    {
+                        codeWriter.writePush();
+                    }
                 }
             }
         }
