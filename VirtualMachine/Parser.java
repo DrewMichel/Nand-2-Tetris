@@ -10,7 +10,8 @@ import java.util.ArrayList;
 
 public class Parser
 {
-    // hashmap, enums, or array for commandTypes
+    // Constants
+    private static final String[] VALID_INPUT_FILE_EXTENSIONS = {".vm"};
     
     // Instance variables
     private Scanner fileScanner;
@@ -113,5 +114,51 @@ public class Parser
         }
         
         return builder.toString();
+    }
+    
+    public static boolean hasValidFileExtension(File path)
+    {
+        if(path != null && path.exists())
+        {
+            String extension = getFileExtension(path);
+            
+            for(int i = 0; i < VALID_INPUT_FILE_EXTENSIONS.length; ++i)
+            {
+                if(extension.equalsIgnoreCase(VALID_INPUT_FILE_EXTENSIONS[i]))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    public static boolean hasValidFileExtension(String path)
+    {
+        return hasValidFileExtension(new File(path));
+    }
+    
+    public static String getFileExtension(File path)
+    {
+        String out = null;
+        
+        if(path != null)
+        {
+            String name = path.getName();
+            int index = name.lastIndexOf(".");
+            
+            if(index > -1)
+            {
+                out = name.substring(index);
+            }
+        }
+        
+        return out;
+    }
+    
+    public static String getFileExtension(String path)
+    {
+        return getFileExtension(new File(path));
     }
 }

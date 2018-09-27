@@ -38,10 +38,10 @@ public class CodeWriter
         }
     }
     
-    // Sets fileName instance variable to String parameter name
-    public void setFileName(String name)
+    // Returns String fileName instance variable
+    public String getFileName()
     {
-        fileName = name;
+        return fileName;
     }
     
     // Writes the assembly code that is the translation

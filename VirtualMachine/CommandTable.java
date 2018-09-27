@@ -20,7 +20,7 @@ public final class CommandTable
         populateCommander();
     }
     
-    public CommandTable getCommandTable()
+    public static CommandTable getCommandTable()
     {
         if(commander == null)
         {

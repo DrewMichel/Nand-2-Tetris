@@ -18,7 +18,7 @@ public class Main
         
         populateFlagMap(flagMap);
         
-        System.out.println("Virtual Machine translater starting.");
+        System.out.println("Virtual Machine translator starting.");
         
         if(args == null || args.length <= 0)
         {
@@ -30,18 +30,55 @@ public class Main
         
         processArguments(regularFiles, flagMap, args);
         
-        Iterator<File> fileIterator = regularFiles.iterator();
+        displayFiles(regularFiles);
         
-        /*
-        while(fileIterator.hasNext())
+        System.out.println("Detected: " + regularFiles.size() + " valid files.");
+        
+        System.out.println("Beginning file translation...");
+        
+        processFiles(regularFiles, flagMap);
+        
+        System.out.println("Virtual Machine translator ending.");
+    }
+    
+    public static void processFiles(LinkedHashSet<File> files, HashMap<String, Boolean> flags)
+    {
+        if(files != null)
         {
-            System.out.println(fileIterator.next().getAbsolutePath());
+            Parser parser = null;
+            CodeWriter codeWriter = null;
+            CommandTable commandTable = CommandTable.getCommandTable();
+            
+            Iterator<File> fileIterator = files.iterator();
+            
+            File currentFile;
+            
+            while(fileIterator.hasNext())
+            {
+                currentFile = fileIterator.next();
+                
+                parser = new Parser(currentFile);
+                codeWriter = new CodeWriter(CodeWriter.adjustExtension(currentFile));
+                
+                while(parser.hasMoreCommands())
+                {
+                    parser.advance();
+                }
+            }
         }
-        */
+    }
+    
+    public static void displayFiles(LinkedHashSet<File> files)
+    {
+        if(files != null)
+        {
+            Iterator<File> fileIterator = files.iterator();
         
-        System.out.println("Detected: " + regularFiles.size() + " files.");
-        
-        System.out.println("Virtual Machine translater ending.");
+            while(fileIterator.hasNext())
+            {
+                System.out.println(fileIterator.next().getAbsolutePath());
+            }
+        }
     }
     
     public static void processArguments(LinkedHashSet<File> files, HashMap<String, Boolean> flags, String[] args)
@@ -64,7 +101,7 @@ public class Main
                 {
                     allDirectories.add(currentFile);
                 }
-                else if(currentFile.isFile())
+                else if(currentFile.isFile() && Parser.hasValidFileExtension(currentFile))
                 {
                     files.add(currentFile);
                 }
@@ -104,7 +141,7 @@ public class Main
                         {
                             currentDirectories.add(filesInDirectory[i]);
                         }
-                        else if(filesInDirectory[i].isFile())
+                        else if(filesInDirectory[i].isFile() && Parser.hasValidFileExtension(filesInDirectory[i]))
                         {
                             files.add(filesInDirectory[i]);
                         }
@@ -142,7 +179,7 @@ public class Main
                         {
                             innerDirectories.add(filesInDirectory[i]);
                         }
-                        else if(filesInDirectory[i].isFile())
+                        else if(filesInDirectory[i].isFile() && Parser.hasValidFileExtension(filesInDirectory[i]))
                         {
                             files.add(filesInDirectory[i]);
                         }
