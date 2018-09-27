@@ -47,7 +47,6 @@ public class Main
         {
             Parser parser = null;
             CodeWriter codeWriter = null;
-            CommandTable commandTable = CommandTable.getCommandTable();
             
             Iterator<File> fileIterator = files.iterator();
             
@@ -63,6 +62,14 @@ public class Main
                 while(parser.hasMoreCommands())
                 {
                     parser.advance();
+                    
+                    parser.commandType();
+                    
+                    if(parser.getCurrentType().equals(CommandTable.C_ARITHMETIC_TYPE))
+                    {
+                        codeWriter.writeArithmetic(parser.getCurrentCommand());
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_))
                 }
             }
         }

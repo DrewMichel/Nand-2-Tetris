@@ -12,10 +12,12 @@ public class Parser
 {
     // Constants
     private static final String[] VALID_INPUT_FILE_EXTENSIONS = {".vm"};
+    private static final int INVALID_ARGUMENT_VALUE = -1;
     
     // Instance variables
     private Scanner fileScanner;
-    private String fileName, currentCommand;
+    private String fileName, currentCommand, currentType;
+    private CommandTable commandTable;
     
     // Constructor
     public Parser(File path)
@@ -34,6 +36,8 @@ public class Parser
         {
             fileScanner = new Scanner(path);
             fileName = path.getAbsolutePath();
+            commandTable = CommandTable.getCommandTable();
+            currentType = CommandTable.C_INVALID;
         }
         catch(FileNotFoundException e)
         {
@@ -53,14 +57,43 @@ public class Parser
     // Initially there is no current command.
     public void advance()
     {
-        currentCommand = fileScanner.nextLine();
+        currentCommand = trimWhitespace(clearCommentation(fileScanner.nextLine()));
     }
     
     // Returns the type of the current VM command.
     // C_ARITHMETIC is returned for all the arithmetic commands.
     public String commandType()
     {
-        return null;
+        if(currentCommand != null)
+        {
+            int index = currentCommand.indexOf(" ");
+            
+            if(index > -1)
+            {
+                currentType = commandTable.getCommandType(currentCommand.substring(0, index));
+                return currentType;
+            }
+            else
+            {
+                currentType = commandTable.getCommandType(currentCommand);
+                return currentType;
+            }
+        }
+        else
+        {
+            currentType = CommandTable.C_INVALID;
+            return currentType;
+        }
+    }
+    
+    public String getCurrentType()
+    {
+        return currentType;
+    }
+    
+    public String getCurrentCommand()
+    {
+        return currentCommand;
     }
     
     // Returns the first arg. of the current command.
@@ -69,7 +102,21 @@ public class Parser
     // if the current command is C_RETURN.
     public String arg1()
     {
-        return null;
+        if(currentCommand != null)
+        {
+            int index = currentCommand.indexOf(" ");
+            
+            if(index > -1)
+            {
+                return currentCommand.substring(0, index);
+            }
+            else
+            {
+                return currentCommand;
+            }
+        }
+        
+        return CommandTable.C_INVALID_TYPE;
     }
     
     // Returns the second argument of the current command.
@@ -77,7 +124,29 @@ public class Parser
     // is C_PUSH, C_POP, C_FUNCTION, or C_CALL.
     public int arg2()
     {
-        return -1;
+        if(currentCommand != null)
+        {
+            int firstSpace = currentCommand.indexOf(" "), secondSpace = -1;
+            
+            if(firstSpace > -1)
+            {
+                String sub = currentCommand.substring(firstSpace + 1);
+                
+                secondSpace = sub.indexOf(" ");
+                
+                if(secondSpace > -1)
+                {
+                    sub = sub.substring(0, secondSpace);
+                }
+                
+                if(isDigits(sub))
+                {
+                    return Integer.parseInt(sub);
+                }
+            }
+        }
+        
+        return INVALID_ARGUMENT_VALUE;
     }
     
     public static String clearCommentation(String original)
@@ -91,6 +160,69 @@ public class Parser
         }
         
         return out;
+    }
+    
+    // Returns a String with the contents of String parameter original without
+    // whitespace before and after all other characters within
+    // the original String
+    // Trims spaces between other characters down to a single space
+    // I.E "   abc  def ghi    " becomes "abc def ghi"
+    public static String trimWhitespace(String original)
+    {
+        StringBuilder builder = new StringBuilder();
+        
+        boolean noneSpaceDetected = false, previousSpace = true, isSpace = false;
+        
+        char current;
+        
+        if(original != null)
+        {
+            for(int i = 0; i < original.length(); ++i)
+            {
+                current = original.charAt(i);
+                
+                isSpace = Character.isSpace(current);
+                
+                if(!isSpace)
+                {
+                    previousSpace = false;
+                    noneSpaceDetected = true;
+                    builder.append(current);
+                }
+                else if(isSpace && !previousSpace && noneSpaceDetected)
+                {
+                    previousSpace = true;
+                    builder.append(current);
+                }
+            }
+            
+            int builderLength = builder.length();
+            
+            if((builderLength > 0) && Character.isSpace(builder.charAt(builderLength - 1)))
+            {
+                builder.deleteCharAt(builderLength - 1);
+            }
+        }
+        
+        return builder.toString();
+    }
+    
+    public static boolean isDigits(String original)
+    {
+        if(original == null || 1 > original.length())
+        {
+            return false;
+        }
+        
+        for(int i = 0; i < original.length(); ++i)
+        {
+            if(!Character.isDigit(original.charAt(i)))
+            {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     public static String clearWhitespace(String original)
