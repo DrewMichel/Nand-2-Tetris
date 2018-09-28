@@ -7,13 +7,14 @@ import java.io.IOException;
 public class CodeWriter
 {
     // Constants
-    public static final String OUTPUT_FILE_EXTENSION = ".asm";
+    public static final String OUTPUT_FILE_EXTENSION = ".asm", LINE_COMMENT = "//", ADDRESS_SYMBOL = "@";
     
     // Instance variables
+    private PointerTable pointerTable;
     private PrintWriter fileWriter;
     private String fileName;
     
-    private int stackPointer;
+    private int stackPointer, programCounter;
     
     // Constructor
     public CodeWriter(File path)
@@ -31,7 +32,10 @@ public class CodeWriter
         try
         {
             fileWriter = new PrintWriter(path);
+            pointerTable = new PointerTable();
             fileName = path.getAbsolutePath();
+            stackPointer = PointerTable.STACK_MIN_VALUE;
+            programCounter = 1;
         }
         catch(IOException e)
         {
@@ -44,6 +48,21 @@ public class CodeWriter
     public String getFileName()
     {
         return fileName;
+    }
+    
+    public void incrementProgramCounter()
+    {
+        ++programCounter;
+    }
+    
+    public void setProgramCounter(int counter)
+    {
+        programCounter = counter;
+    }
+    
+    public void writeComment(String comment)
+    {
+        fileWriter.println(LINE_COMMENT + " " + programCounter + ": " + comment);
     }
     
     // Writes the assembly code that is the translation
@@ -102,6 +121,45 @@ public class CodeWriter
     // of the given command C_PUSH.
     // Pushes the value from the segment's pointer + index onto the stack
     public void writePush(String segment, int index)
+    {
+        if(segment.equals(PointerTable.CONSTANT_SEGMENT))
+        {
+            writePushConstant(index);
+        }
+        else if(pointerTable.contains(segment))
+        {
+            writePushGeneral(pointerTable.getGeneralSymbol(segment), index);
+        }
+    }
+    
+    // Constant
+    public void writePushConstant(int index)
+    {
+        System.out.println(ADDRESS_SYMBOL + index); // @ constant value of index
+        System.out.println("D=A"); // Sets D register = index
+        System.out.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL); // @SP
+        System.out.println("M=M+1"); // Increments the value SP points
+        System.out.println("A=M-1"); // Goes to the previous value SP pointed to
+        System.out.println("M=D"); // Sets value ontop of stack to D (index)
+    }
+    
+    // Local, Argument, This, and That, ... (Temp?), (Pointer?)
+    public void writePushGeneral(String symbol, int index)
+    {
+        // Acquire value at symbol's base address + index
+        System.out.println(ADDRESS_SYMBOL + index);
+        System.out.println("D=A");
+        System.out.println(ADDRESS_SYMBOL + symbol);
+        System.out.println("A=D+M");
+        System.out.println("D=M");
+        
+        // Push value onto stack
+        System.out.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        System.out.println("A=M");
+        System.out.println("M=D");
+    }
+    
+    public void writePushStatic(String segment, int index)
     {
         
     }

@@ -67,15 +67,21 @@ public class Main
                     
                     if(parser.getCurrentType().equals(CommandTable.C_ARITHMETIC_TYPE))
                     {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
                         codeWriter.writeArithmetic(parser.getCurrentCommand());
                     }
                     else if(parser.getCurrentType().equals(CommandTable.C_POP_TYPE))
                     {
-                        codeWriter.writePop();
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                        codeWriter.writePop(parser.segment(), parser.arg2());
                     }
                     else if(parser.getCurrentType().equals(CommandTable.C_PUSH_TYPE))
                     {
-                        codeWriter.writePush();
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                        codeWriter.writePush(parser.segment(), parser.arg2());
                     }
                 }
             }

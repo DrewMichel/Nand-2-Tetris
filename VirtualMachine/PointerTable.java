@@ -38,6 +38,14 @@
 // Pointer 0 should access This
 // Pointer 1 should access That
 // Pointer should access actual This/That pointers (3/4) not their memory values
+//
+// According to coursework:
+// set RAM[0] 256,   // stack pointer
+// set RAM[1] 300,   // base address of the local segment
+// set RAM[2] 400,   // base address of the argument segment
+// set RAM[3] 3000,  // base address of the this segment
+// set RAM[4] 3010,  // base address of the that segment
+// segments should be iniitalized with these values
 
 import java.util.HashMap;
 
@@ -50,6 +58,57 @@ public class PointerTable
                             GENERAL_MAX_VALUE = 15, STACK_POINTER = 0,
                             LOCAL_POINTER = 1, ARGUMENT_POINTER = 2,
                             THIS_POINTER = 3, THAT_POINTER = 4;
+    
+    // Hack assembly symbols
+    public static final String STACK_SYMBOL = "SP", LOCAL_SYMBOL = "LCL",
+                               ARGUMENT_SYMBOL = "ARG", THIS_SYMBOL = "THIS",
+                               THAT_SYMBOL = "THAT";
+                               
+    // VM segment names
+    public static final String CONSTANT_SEGMENT = "constant",
+                               LOCAL_SEGMENT = "local",
+                               ARGUMENT_SEGMENT = "argument",
+                               THIS_SEGMENT = "this", THAT_SEGMENT = "that",
+                               STATIC_SEGMENT = "static",
+                               POINTER_SEGMENT = "pointer",
+                               TEMP_SEGMENT = "temp";
                             
-    public static final String INVALID_POINTER = "INVALID POINTER ADDRESS";
+    public static final String INVALID_POINTER = "INVALID POINTER ADDRESS",
+                               INVALID_SEGMENT = "INVALID SEGMENT NAME";
+    
+    private HashMap<String, String> generalSegmentMap;
+    
+    public PointerTable()
+    {
+        initialize();
+    }
+    
+    private void initialize()
+    {
+        generalSegmentMap = new HashMap<String, String>();
+        
+        generalSegmentMap.put(LOCAL_SEGMENT, LOCAL_SYMBOL);
+        generalSegmentMap.put(ARGUMENT_SEGMENT, ARGUMENT_SYMBOL);
+        generalSegmentMap.put(THIS_SEGMENT, THIS_SYMBOL);
+        generalSegmentMap.put(THAT_SEGMENT, THAT_SYMBOL);
+    }
+    
+    public boolean contains(String segment)
+    {
+        return generalSegmentMap.containsKey(segment);
+    }
+    
+    public String getGeneralSymbol(String segment)
+    {
+        return generalSegmentMap.get(segment);
+    }
+    
+    // Should be called before pushing onto the stack
+    // and after popping off of the stack
+    // Could be called before committing the results of an arithmetic
+    // operation onto the stack
+    public static boolean withinStack(int pointer)
+    {
+        return (pointer >= STACK_MIN_VALUE && pointer <= STACK_MAX_VALUE);
+    }
 }
