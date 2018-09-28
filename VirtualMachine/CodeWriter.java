@@ -155,7 +155,8 @@ public class CodeWriter
         
         // Push value onto stack
         System.out.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        System.out.println("A=M");
+        System.out.println("M=M+1");
+        System.out.println("A=M-1");
         System.out.println("M=D");
     }
     
