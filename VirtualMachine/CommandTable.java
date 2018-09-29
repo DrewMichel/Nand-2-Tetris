@@ -6,7 +6,7 @@ public final class CommandTable
     
     // C_COMMANDS
     public static final String C_ADDITION = "add", C_SUBTRACT = "sub",
-                               C_NEGATIVE = "neg", C_EQUAL = "eq",
+                               C_NEGATE = "neg", C_EQUAL = "eq",
                                C_GREATER = "gt", C_LESSER = "lt", C_AND = "and",
                                C_OR = "or", C_NOT = "not", C_POP = "pop",
                                C_PUSH = "push", C_INVALID = "Invalid";
@@ -49,7 +49,7 @@ public final class CommandTable
         // C_ARITHMETIC types
         commandMap.put(C_ADDITION, C_ARITHMETIC_TYPE);
         commandMap.put(C_SUBTRACT, C_ARITHMETIC_TYPE);
-        commandMap.put(C_NEGATIVE, C_ARITHMETIC_TYPE);
+        commandMap.put(C_NEGATE  , C_ARITHMETIC_TYPE);
         commandMap.put(C_EQUAL   , C_ARITHMETIC_TYPE);
         commandMap.put(C_GREATER , C_ARITHMETIC_TYPE);
         commandMap.put(C_LESSER  , C_ARITHMETIC_TYPE);

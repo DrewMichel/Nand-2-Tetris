@@ -49,6 +49,10 @@
 //
 // @R13, @R14, and @R15 are general purpose registers that can be used during
 // operations
+//
+// According to coursework:
+// -1 Represents the boolean true
+// 0 Represents the boolean false
 
 import java.util.HashMap;
 
@@ -67,6 +71,9 @@ public class PointerTable
                             GENERAL_MAX_VALUE = 15, LOCAL_MIN_VALUE = 300,
                             ARGUMENT_MIN_VALUE = 400, THIS_MIN_VALUE = 3000,
                             THAT_MIN_VALUE = 4000;
+    
+    // Boolean values
+    public static final int TRUE_VALUE = -1, FALSE_VALUE = 0;
     
     // Hack assembly symbols
     public static final String STACK_SYMBOL = "SP", LOCAL_SYMBOL = "LCL",

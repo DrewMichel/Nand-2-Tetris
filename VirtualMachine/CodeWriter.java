@@ -7,14 +7,17 @@ import java.io.IOException;
 public class CodeWriter
 {
     // Constants
-    public static final String OUTPUT_FILE_EXTENSION = ".asm", LINE_COMMENT = "//", ADDRESS_SYMBOL = "@";
+    public static final String OUTPUT_FILE_EXTENSION = ".asm",
+                               LINE_COMMENT = "//", ADDRESS_SYMBOL = "@",
+                               END_OF_OPERATION_LABEL = "END_OF_OPERATION", LABEL_START = "(",
+                               LABEL_END = ")";
     
     // Instance variables
     private PointerTable pointerTable;
     private PrintWriter fileWriter;
     private String fileName;
     
-    private int stackPointer, programCounter;
+    private int stackPointer, programCounter, labelCounter;
     
     // Constructor
     public CodeWriter(File path)
@@ -36,6 +39,7 @@ public class CodeWriter
             fileName = path.getAbsolutePath();
             stackPointer = PointerTable.STACK_MIN_VALUE;
             programCounter = 1;
+            labelCounter = 1;
         }
         catch(IOException e)
         {
@@ -76,35 +80,35 @@ public class CodeWriter
         }
         else if(command.equals(CommandTable.C_SUBTRACT))
         {
-            //writeArithmeticSubtract();
+            writeArithmeticSubtract();
         }
-        else if(command.equals(CommandTable.C_NEGATIVE))
+        else if(command.equals(CommandTable.C_NEGATE))
         {
-            ///writeArithmeticNegative();
+            writeArithmeticNegate();
         }
         else if(command.equals(CommandTable.C_EQUAL))
         {
-            //writeArithmeticEqual();
+            writeArithmeticEqual(command);
         }
         else if(command.equals(CommandTable.C_GREATER))
         {
-            //writeArithmeticGreater();
+            writeArithmeticGreater(command);
         }
         else if(command.equals(CommandTable.C_LESSER))
         {
-            //writeArithmeticLesser();
+            writeArithmeticLesser(command);
         }
         else if(command.equals(CommandTable.C_AND))
         {
-            //writeArithmeticAnd();
+            writeArithmeticAnd();
         }
         else if(command.equals(CommandTable.C_OR))
         {
-            //writeArithmeticOr();
+            writeArithmeticOr();
         }
         else if(command.equals(CommandTable.C_NOT))
         {
-            ///writeArithmeticNot();
+            writeArithmeticNot();
         }
         else
         {
@@ -114,14 +118,113 @@ public class CodeWriter
     
     public void writeArithmeticAddition()
     {
+        writeOperationHeader();
+        
+        fileWriter.println("M=D+M");
+    }
+    
+    public void writeArithmeticSubtract()
+    {
+        writeOperationHeader();
+        
+        fileWriter.println("M=M-D");
+    }
+    
+    public void writeArithmeticNegate()
+    {
+        // Negate value at the top of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("A=M-1"); // leaving stack pointer at original position
+        fileWriter.println("M=-M"); // Sets memory ontop of stack to its negative
+    }
+    
+    public void writeArithmeticEqual(String labelName)
+    {
+        writeLogicalHeader(labelName);
+        
+        fileWriter.println("D;JEQ");
+        
+        writeLogicalBody(labelName);
+    }
+    
+    public void writeArithmeticGreater(String labelName)
+    {
+        writeLogicalHeader(labelName);
+        
+        fileWriter.println("D;JGT");
+        
+        writeLogicalBody(labelName);
+    }
+    
+    public void writeArithmeticLesser(String labelName)
+    {
+        writeLogicalHeader(labelName);
+        
+        fileWriter.println("D:JLT");
+        
+        writeLogicalBody(labelName);
+    }
+    
+    public void writeArithmeticAnd()
+    {
+        writeOperationHeader();
+        
+        fileWriter.println("M=D&M");
+    }
+    
+    public void writeArithmeticOr()
+    {
+        writeOperationHeader();
+        
+        fileWriter.println("M=D|M");
+    }
+    
+    public void writeArithmeticNot()
+    {
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("A=M-1");
+        fileWriter.println("M=!M");
+    }
+    
+    public void writeOperationHeader()
+    {
         // Acquire value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("AM=M-1");
         fileWriter.println("D=M");
         
-        // Set value ontop of the stack
         fileWriter.println("A=A-1");
-        fileWriter.println("M=D+M");
+    }
+    
+    public void writeLogicalHeader(String labelName)
+    {
+        // Acquire value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
+        fileWriter.println("D=M");
+
+        fileWriter.println("A=A-1");
+        fileWriter.println("D=M-D");
+        
+        fileWriter.println(ADDRESS_SYMBOL + generateLabelSymbol(labelName));
+    }
+    
+    public void writeLogicalBody(String labelName)
+    {
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("A=M"); 
+        fileWriter.println("M=" + PointerTable.FALSE_VALUE);// false, not equal
+        fileWriter.println(ADDRESS_SYMBOL + generateEndLabelSymbol());
+        fileWriter.println("0;JMP");
+        
+        fileWriter.println(generateLabel(labelName));
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("A=M");
+        fileWriter.println("M=" + PointerTable.TRUE_VALUE);
+        
+        fileWriter.println(generateEndLabel());
+        
+        incrementLabelCounter();
     }
     
     // Writes the assembly code that is the translation
@@ -242,5 +345,30 @@ public class CodeWriter
     public static String adjustExtension(String path)
     {
         return adjustExtension(new File(path));
+    }
+    
+    public String generateLabel(String labelName)
+    {
+        return LABEL_START + labelName + labelCounter + LABEL_END;
+    }
+    
+    public String generateLabelSymbol(String labelName)
+    {
+        return labelName + labelCounter;
+    }
+    
+    public String generateEndLabel()
+    {
+        return LABEL_START + END_OF_OPERATION_LABEL + labelCounter + LABEL_END;
+    }
+    
+    public String generateEndLabelSymbol()
+    {
+        return END_OF_OPERATION_LABEL + labelCounter;
+    }
+    
+    public void incrementLabelCounter()
+    {
+        ++labelCounter;
     }
 }
