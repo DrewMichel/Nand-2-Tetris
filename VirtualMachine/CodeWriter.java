@@ -72,39 +72,39 @@ public class CodeWriter
     {
         if(command.equals(CommandTable.C_ADDITION))
         {
-            //writeAddition();
+            writeArithmeticAddition();
         }
         else if(command.equals(CommandTable.C_SUBTRACT))
         {
-            //writeSubtract();
+            //writeArithmeticSubtract();
         }
         else if(command.equals(CommandTable.C_NEGATIVE))
         {
-            //writeNegative();
+            ///writeArithmeticNegative();
         }
         else if(command.equals(CommandTable.C_EQUAL))
         {
-            //writeEqual();
+            //writeArithmeticEqual();
         }
         else if(command.equals(CommandTable.C_GREATER))
         {
-            //writeGreater();
+            //writeArithmeticGreater();
         }
         else if(command.equals(CommandTable.C_LESSER))
         {
-            //writeLesser();
+            //writeArithmeticLesser();
         }
         else if(command.equals(CommandTable.C_AND))
         {
-            //writeAnd();
+            //writeArithmeticAnd();
         }
         else if(command.equals(CommandTable.C_OR))
         {
-            //writeOr();
+            //writeArithmeticOr();
         }
         else if(command.equals(CommandTable.C_NOT))
         {
-            //writeNot();
+            ///writeArithmeticNot();
         }
         else
         {
@@ -112,9 +112,16 @@ public class CodeWriter
         }
     }
     
-    public void writeArithmetic()
+    public void writeArithmeticAddition()
     {
+        // Acquire value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
+        fileWriter.println("D=M");
         
+        // Set value ontop of the stack
+        fileWriter.println("A=A-1");
+        fileWriter.println("M=D+M");
     }
     
     // Writes the assembly code that is the translation
@@ -126,7 +133,7 @@ public class CodeWriter
         {
             writePushConstant(index);
         }
-        else if(pointerTable.contains(segment))
+        else if(pointerTable.containsGeneralSegment(segment))
         {
             writePushGeneral(pointerTable.getGeneralSymbol(segment), index);
         }
@@ -135,29 +142,29 @@ public class CodeWriter
     // Constant
     public void writePushConstant(int index)
     {
-        System.out.println(ADDRESS_SYMBOL + index); // @ constant value of index
-        System.out.println("D=A"); // Sets D register = index
-        System.out.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL); // @SP
-        System.out.println("M=M+1"); // Increments the value SP points
-        System.out.println("A=M-1"); // Goes to the previous value SP pointed to
-        System.out.println("M=D"); // Sets value ontop of stack to D (index)
+        fileWriter.println(ADDRESS_SYMBOL + index); // @ constant value of index
+        fileWriter.println("D=A"); // Sets D register = index
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL); // @SP
+        fileWriter.println("M=M+1"); // Increments the value SP points
+        fileWriter.println("A=M-1"); // Goes to the previous value SP pointed to
+        fileWriter.println("M=D"); // Sets value ontop of stack to D (index)
     }
     
     // Local, Argument, This, and That, ... (Temp?), (Pointer?)
     public void writePushGeneral(String symbol, int index)
     {
         // Acquire value at symbol's base address + index
-        System.out.println(ADDRESS_SYMBOL + index);
-        System.out.println("D=A");
-        System.out.println(ADDRESS_SYMBOL + symbol);
+        fileWriter.println(ADDRESS_SYMBOL + index);
+        fileWriter.println("D=A");
+        fileWriter.println(ADDRESS_SYMBOL + symbol);
         System.out.println("A=D+M");
         System.out.println("D=M");
         
         // Push value onto stack
-        System.out.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        System.out.println("M=M+1");
-        System.out.println("A=M-1");
-        System.out.println("M=D");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=M+1");
+        fileWriter.println("A=M-1");
+        fileWriter.println("M=D");
     }
     
     public void writePushStatic(String segment, int index)
@@ -170,7 +177,32 @@ public class CodeWriter
     // Pops value off the stack onto the segment's pointer + index.
     public void writePop(String segment, int index)
     {
+        if(pointerTable.containsGeneralSegment(segment))
+        {
+            writePopGeneral(pointerTable.getGeneralSymbol(segment), index);
+        }
+    }
+    
+    public void writePopGeneral(String symbol, int index)
+    {
+        // Set general register to symbol's base address + index
+        fileWriter.println(ADDRESS_SYMBOL + index);
+        fileWriter.println("D=A");
+        fileWriter.println(ADDRESS_SYMBOL + symbol);
+        fileWriter.println("A=D+M");
+        fileWriter.println("D=A");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[0]);
+        fileWriter.println("M=D");
         
+        // Acquire value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
+        fileWriter.println("D=M");
+        
+        // Move value to segment's base address + index
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[0]);
+        fileWriter.println("A=M");
+        fileWriter.println("M=D");
     }
     
     // Closes the output file.

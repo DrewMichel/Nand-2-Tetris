@@ -46,18 +46,27 @@
 // set RAM[3] 3000,  // base address of the this segment
 // set RAM[4] 3010,  // base address of the that segment
 // segments should be iniitalized with these values
+//
+// @R13, @R14, and @R15 are general purpose registers that can be used during
+// operations
 
 import java.util.HashMap;
 
 public class PointerTable
-{                           
+{   
+    // Pointer addresses
+    public static final int STACK_POINTER = 0, LOCAL_POINTER = 1,
+                            ARGUMENT_POINTER = 2, THIS_POINTER = 3,
+                            THAT_POINTER = 4;
+                            
+    // Segment ranges
     public static final int STACK_MIN_VALUE = 256, STACK_MAX_VALUE = 2047,
                             HEAP_MIN_VALUE = 2048, STATIC_MIN_VALUE = 16,
                             STATIC_MAX_VALUE = 255, TEMP_MIN_VALUE = 5,
                             TEMP_MAX_VALUE = 12, GENERAL_MIN_VALUE = 13,
-                            GENERAL_MAX_VALUE = 15, STACK_POINTER = 0,
-                            LOCAL_POINTER = 1, ARGUMENT_POINTER = 2,
-                            THIS_POINTER = 3, THAT_POINTER = 4;
+                            GENERAL_MAX_VALUE = 15, LOCAL_MIN_VALUE = 300,
+                            ARGUMENT_MIN_VALUE = 400, THIS_MIN_VALUE = 3000,
+                            THAT_MIN_VALUE = 4000;
     
     // Hack assembly symbols
     public static final String STACK_SYMBOL = "SP", LOCAL_SYMBOL = "LCL",
@@ -72,11 +81,14 @@ public class PointerTable
                                STATIC_SEGMENT = "static",
                                POINTER_SEGMENT = "pointer",
                                TEMP_SEGMENT = "temp";
+                               
+    public static final String[] GENERAL_PURPOSE_REGISTERS = {"R13", "R14", "R15"};
                             
     public static final String INVALID_POINTER = "INVALID POINTER ADDRESS",
                                INVALID_SEGMENT = "INVALID SEGMENT NAME";
     
     private HashMap<String, String> generalSegmentMap;
+    private HashMap<String, Integer> generalValueMap;
     
     public PointerTable()
     {
@@ -86,14 +98,20 @@ public class PointerTable
     private void initialize()
     {
         generalSegmentMap = new HashMap<String, String>();
+        generalValueMap = new HashMap<String, Integer>();
         
         generalSegmentMap.put(LOCAL_SEGMENT, LOCAL_SYMBOL);
         generalSegmentMap.put(ARGUMENT_SEGMENT, ARGUMENT_SYMBOL);
         generalSegmentMap.put(THIS_SEGMENT, THIS_SYMBOL);
         generalSegmentMap.put(THAT_SEGMENT, THAT_SYMBOL);
+        
+        generalValueMap.put(LOCAL_SYMBOL, LOCAL_MIN_VALUE);
+        generalValueMap.put(ARGUMENT_SYMBOL, ARGUMENT_MIN_VALUE);
+        generalValueMap.put(THIS_SYMBOL, THIS_MIN_VALUE);
+        generalValueMap.put(THAT_SYMBOL, THAT_MIN_VALUE);
     }
     
-    public boolean contains(String segment)
+    public boolean containsGeneralSegment(String segment)
     {
         return generalSegmentMap.containsKey(segment);
     }
@@ -101,6 +119,16 @@ public class PointerTable
     public String getGeneralSymbol(String segment)
     {
         return generalSegmentMap.get(segment);
+    }
+    
+    public boolean containsGeneralSymbol(String symbol)
+    {
+        return generalValueMap.containsKey(symbol);
+    }
+    
+    public int getGeneralValue(String symbol)
+    {
+        return generalValueMap.get(symbol);
     }
     
     // Should be called before pushing onto the stack
