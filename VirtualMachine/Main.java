@@ -57,7 +57,7 @@ public class Main
                 currentFile = fileIterator.next();
                 
                 parser = new Parser(currentFile);
-                codeWriter = new CodeWriter(CodeWriter.adjustExtension(currentFile));
+                codeWriter = new CodeWriter(CodeWriter.adjustExtension(currentFile, CodeWriter.OUTPUT_FILE_EXTENSION));
                 
                 while(parser.hasMoreCommands())
                 {

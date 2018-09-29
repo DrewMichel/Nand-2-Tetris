@@ -9,8 +9,8 @@ public class CodeWriter
     // Constants
     public static final String OUTPUT_FILE_EXTENSION = ".asm",
                                LINE_COMMENT = "//", ADDRESS_SYMBOL = "@",
-                               END_OF_OPERATION_LABEL = "END_OF_OPERATION", LABEL_START = "(",
-                               LABEL_END = ")";
+                               END_OF_OPERATION_LABEL = "END_OF_OPERATION",
+                               LABEL_START = "(", LABEL_END = ")", PERIOD = ".";
     
     // Instance variables
     private PointerTable pointerTable;
@@ -244,6 +244,10 @@ public class CodeWriter
         {
             writePushTemp(index);
         }
+        else if(segment.equals(PointerTable.STATIC_SEGMENT))
+        {
+            writePushStatic(index);
+        }
     }
     
     // Constant
@@ -287,9 +291,17 @@ public class CodeWriter
         fileWriter.println("M=D");
     }
     
-    public void writePushStatic(String segment, int index)
+    public void writePushStatic(int index)
     {
+        // Acquire value at static index
+        fileWriter.println(ADDRESS_SYMBOL + adjustExtension(getRealName(fileName), PERIOD + index));
+        fileWriter.println("D=M");
         
+        // Push value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=M+1");
+        fileWriter.println("A=M-1");
+        fileWriter.println("M=D");
     }
     
     // Writes the assembly code that is the translation
@@ -304,6 +316,10 @@ public class CodeWriter
         else if(segment.equals(PointerTable.TEMP_SEGMENT))
         {
             writePopTemp(segment, index);
+        }
+        else if(segment.equals(PointerTable.STATIC_SEGMENT))
+        {
+            writePopStatic(index);
         }
     }
     
@@ -341,6 +357,18 @@ public class CodeWriter
         fileWriter.println("M=D");
     }
     
+    public void writePopStatic(int index)
+    {
+        // Acquire value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
+        fileWriter.println("D=M");
+        
+        // Move value to static index
+        fileWriter.println(ADDRESS_SYMBOL + adjustExtension(getRealName(fileName), PERIOD + index));
+        fileWriter.println("M=D");
+    }
+    
     // Closes the output file.
     public void close()
     {
@@ -350,7 +378,12 @@ public class CodeWriter
         }
     }
     
-    public static String adjustExtension(File path)
+    public static String adjustExtension(File path, String extension)
+    {
+        return adjustExtension(path.getAbsolutePath(), extension);
+    }
+    
+    public static String adjustExtension(String path, String extension)
     {
         int index = -1;
         
@@ -358,26 +391,52 @@ public class CodeWriter
         
         if(path != null)
         {
-            out = path.getAbsolutePath();
+            out = path;
             
-            index = out.lastIndexOf(".");
+            index = out.lastIndexOf(PERIOD);
             
             if(index < 0)
             {
-                out += OUTPUT_FILE_EXTENSION;
+                out += extension;
             }
             else
             {
-                out = out.substring(0, index) + OUTPUT_FILE_EXTENSION;
+                out = out.substring(0, index) + extension;
             }
         }
         
         return out;
     }
     
-    public static String adjustExtension(String path)
+    public static String getRealName(File path)
     {
-        return adjustExtension(new File(path));
+        return getRealName(path.getAbsolutePath());
+    }
+    
+    public static String getRealName(String path)
+    {
+        String name = path;
+        
+        int index = -1, length = name.length();
+        
+        char current;
+        
+        for(int i = 0; i < length; ++i)
+        {
+            current = name.charAt(i);
+            
+            if(current == '/' || current == '\\')
+            {
+                index = i;
+            }
+        }
+        
+        if(index > -1)
+        {
+            name = name.substring(index + 1);
+        }
+        
+        return name;
     }
     
     public String generateLabel(String labelName)
