@@ -157,8 +157,8 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + index);
         fileWriter.println("D=A");
         fileWriter.println(ADDRESS_SYMBOL + symbol);
-        System.out.println("A=D+M");
-        System.out.println("D=M");
+        fileWriter.println("A=D+M");
+        fileWriter.println("D=M");
         
         // Push value onto stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
