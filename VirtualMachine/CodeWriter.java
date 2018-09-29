@@ -240,6 +240,10 @@ public class CodeWriter
         {
             writePushGeneral(pointerTable.getGeneralSymbol(segment), index);
         }
+        else if(segment.equals(PointerTable.TEMP_SEGMENT))
+        {
+            writePushTemp(index);
+        }
     }
     
     // Constant
@@ -253,7 +257,7 @@ public class CodeWriter
         fileWriter.println("M=D"); // Sets value ontop of stack to D (index)
     }
     
-    // Local, Argument, This, and That, ... (Temp?), (Pointer?)
+    // Push Local, Argument, This, or That's base address + index value
     public void writePushGeneral(String symbol, int index)
     {
         // Acquire value at symbol's base address + index
@@ -264,6 +268,19 @@ public class CodeWriter
         fileWriter.println("D=M");
         
         // Push value onto stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=M+1");
+        fileWriter.println("A=M-1");
+        fileWriter.println("M=D");
+    }
+    
+    public void writePushTemp(int index)
+    {
+        // Acquire value at temp base address + index
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.TEMP_REGISTERS[index]);
+        fileWriter.println("D=M");
+        
+        // Push value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("M=M+1");
         fileWriter.println("A=M-1");
@@ -283,6 +300,10 @@ public class CodeWriter
         if(pointerTable.containsGeneralSegment(segment))
         {
             writePopGeneral(pointerTable.getGeneralSymbol(segment), index);
+        }
+        else if(segment.equals(PointerTable.TEMP_SEGMENT))
+        {
+            writePopTemp(segment, index);
         }
     }
     
@@ -305,6 +326,18 @@ public class CodeWriter
         // Move value to segment's base address + index
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[0]);
         fileWriter.println("A=M");
+        fileWriter.println("M=D");
+    }
+    
+    public void writePopTemp(String symbol, int index)
+    {
+        // Acquire value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
+        fileWriter.println("D=M");
+        
+        // Move value to temp segment's base address + index
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.TEMP_REGISTERS[index]);
         fileWriter.println("M=D");
     }
     

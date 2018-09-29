@@ -89,6 +89,8 @@ public class PointerTable
                                POINTER_SEGMENT = "pointer",
                                TEMP_SEGMENT = "temp";
                                
+    public static final String[] TEMP_REGISTERS = {"R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12"};
+    
     public static final String[] GENERAL_PURPOSE_REGISTERS = {"R13", "R14", "R15"};
                             
     public static final String INVALID_POINTER = "INVALID POINTER ADDRESS",
