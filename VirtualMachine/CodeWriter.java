@@ -198,12 +198,13 @@ public class CodeWriter
     
     public void writeLogicalHeader(String labelName)
     {
-        // Acquire value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("AM=M-1");
+        
         fileWriter.println("D=M");
-
-        fileWriter.println("A=A-1");
+        
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
         fileWriter.println("D=M-D");
         
         fileWriter.println(ADDRESS_SYMBOL + generateLabelSymbol(labelName + labelCounter));
@@ -211,6 +212,7 @@ public class CodeWriter
     
     public void writeLogicalBody(String labelName)
     {
+        
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("A=M"); 
         fileWriter.println("M=" + PointerTable.FALSE_VALUE);// false, not equal
@@ -223,6 +225,10 @@ public class CodeWriter
         fileWriter.println("M=" + PointerTable.TRUE_VALUE);
         
         fileWriter.println(generateEndLabel(Integer.toString(labelCounter)));
+        
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=M+1");
+        
         
         incrementLabelCounter();
     }

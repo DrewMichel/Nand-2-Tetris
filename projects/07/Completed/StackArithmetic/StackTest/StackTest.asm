@@ -16,7 +16,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @eq1
 D;JEQ
@@ -30,6 +31,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION1)
+@SP
+M=M+1
 // 4: push constant 17
 @17
 D=A
@@ -48,7 +51,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @eq2
 D;JEQ
@@ -62,6 +66,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION2)
+@SP
+M=M+1
 // 7: push constant 16
 @16
 D=A
@@ -80,7 +86,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @eq3
 D;JEQ
@@ -94,6 +101,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION3)
+@SP
+M=M+1
 // 10: push constant 892
 @892
 D=A
@@ -112,7 +121,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @lt4
 D;JLT
@@ -126,6 +136,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION4)
+@SP
+M=M+1
 // 13: push constant 891
 @891
 D=A
@@ -144,7 +156,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @lt5
 D;JLT
@@ -158,6 +171,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION5)
+@SP
+M=M+1
 // 16: push constant 891
 @891
 D=A
@@ -176,7 +191,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @lt6
 D;JLT
@@ -190,6 +206,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION6)
+@SP
+M=M+1
 // 19: push constant 32767
 @32767
 D=A
@@ -208,7 +226,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @gt7
 D;JGT
@@ -222,6 +241,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION7)
+@SP
+M=M+1
 // 22: push constant 32766
 @32766
 D=A
@@ -240,7 +261,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @gt8
 D;JGT
@@ -254,6 +276,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION8)
+@SP
+M=M+1
 // 25: push constant 32766
 @32766
 D=A
@@ -272,7 +296,8 @@ M=D
 @SP
 AM=M-1
 D=M
-A=A-1
+@SP
+AM=M-1
 D=M-D
 @gt9
 D;JGT
@@ -286,6 +311,8 @@ M=0
 A=M
 M=-1
 (END_OF_OPERATION9)
+@SP
+M=M+1
 // 28: push constant 57
 @57
 D=A
