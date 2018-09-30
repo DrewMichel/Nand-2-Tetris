@@ -93,6 +93,7 @@ public class PointerTable
     
     public static final String[] GENERAL_PURPOSE_REGISTERS = {"R13", "R14", "R15"};
     
+    // 0 THIS, 1 THAT
     public static final String[] POINTER_REGISTERS = {THIS_SYMBOL, THAT_SYMBOL};
                             
     public static final String INVALID_POINTER = "INVALID POINTER ADDRESS",

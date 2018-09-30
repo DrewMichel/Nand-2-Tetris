@@ -22,7 +22,7 @@ M=D
 @SP
 AM=M-1
 D=M
-@THIS
+@THAT
 M=D
 // 5: push constant 32
 @32

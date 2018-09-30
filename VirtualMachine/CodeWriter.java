@@ -212,7 +212,6 @@ public class CodeWriter
     
     public void writeLogicalBody(String labelName)
     {
-        
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("A=M"); 
         fileWriter.println("M=" + PointerTable.FALSE_VALUE);// false, not equal
@@ -228,7 +227,6 @@ public class CodeWriter
         
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("M=M+1");
-        
         
         incrementLabelCounter();
     }
@@ -381,8 +379,9 @@ public class CodeWriter
     {
         writePopHeader();
         
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.POINTER_REGISTERS[0]);
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.POINTER_REGISTERS[index]);
         fileWriter.println("M=D");
+        
     }
     
     public void writePopHeader()
