@@ -115,7 +115,7 @@ D=M
 A=A-1
 D=M-D
 @lt4
-D:JLT
+D;JLT
 @SP
 A=M
 M=0
@@ -147,7 +147,7 @@ D=M
 A=A-1
 D=M-D
 @lt5
-D:JLT
+D;JLT
 @SP
 A=M
 M=0
@@ -179,7 +179,7 @@ D=M
 A=A-1
 D=M-D
 @lt6
-D:JLT
+D;JLT
 @SP
 A=M
 M=0

@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 public class Main
 {
-    public static final String[] ARGUMENT_FLAGS = {"-R"};
+    public static final String[] ARGUMENT_FLAGS = {"-R", "-C"};
     
     public static void main(String[] args)
     {
@@ -82,6 +82,39 @@ public class Main
                         codeWriter.writeComment(parser.getCurrentCommand());
                         codeWriter.incrementProgramCounter();
                         codeWriter.writePush(parser.segment(), parser.arg2());
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_LABEL_TYPE))
+                    {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                        codeWriter.writeLabel(parser.segment());
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_GOTO_TYPE))
+                    {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                        codeWriter.writeGoto(parser.segment());
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_IF_GOTO_TYPE))
+                    {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                        codeWriter.writeIfGoto(parser.segment());
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_FUNCTION_TYPE))
+                    {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_CALL_TYPE))
+                    {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
+                    }
+                    else if(parser.getCurrentType().equals(CommandTable.C_RETURN_TYPE))
+                    {
+                        codeWriter.writeComment(parser.getCurrentCommand());
+                        codeWriter.incrementProgramCounter();
                     }
                 }
             }

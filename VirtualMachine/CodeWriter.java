@@ -160,7 +160,7 @@ public class CodeWriter
     {
         writeLogicalHeader(labelName);
         
-        fileWriter.println("D:JLT");
+        fileWriter.println("D;JLT");
         
         writeLogicalBody(labelName);
     }
@@ -206,7 +206,7 @@ public class CodeWriter
         fileWriter.println("A=A-1");
         fileWriter.println("D=M-D");
         
-        fileWriter.println(ADDRESS_SYMBOL + generateLabelSymbol(labelName));
+        fileWriter.println(ADDRESS_SYMBOL + generateLabelSymbol(labelName + labelCounter));
     }
     
     public void writeLogicalBody(String labelName)
@@ -214,15 +214,15 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("A=M"); 
         fileWriter.println("M=" + PointerTable.FALSE_VALUE);// false, not equal
-        fileWriter.println(ADDRESS_SYMBOL + generateEndLabelSymbol());
+        fileWriter.println(ADDRESS_SYMBOL + generateEndLabelSymbol(Integer.toString(labelCounter)));
         fileWriter.println("0;JMP");
         
-        fileWriter.println(generateLabel(labelName));
+        fileWriter.println(generateLabel(labelName + labelCounter));
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("A=M");
         fileWriter.println("M=" + PointerTable.TRUE_VALUE);
         
-        fileWriter.println(generateEndLabel());
+        fileWriter.println(generateEndLabel(Integer.toString(labelCounter)));
         
         incrementLabelCounter();
     }
@@ -387,6 +387,28 @@ public class CodeWriter
         fileWriter.println("D=M");
     }
     
+    public void writeLabel(String labelName)
+    {
+        fileWriter.println(generateLabel(labelName));
+    }
+    
+    public void writeGoto(String labelName)
+    {
+        fileWriter.println(ADDRESS_SYMBOL + labelName);
+        fileWriter.println("0;JMP");
+    }
+    
+    public void writeIfGoto(String labelName)
+    {
+        // TODO: MOVE STACK POINTER?
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("A=M");
+        fileWriter.println("D=M");
+        
+        fileWriter.println(ADDRESS_SYMBOL + labelName);
+        fileWriter.println("D;JLT");
+    }
+    
     // Closes the output file.
     public void close()
     {
@@ -459,22 +481,22 @@ public class CodeWriter
     
     public String generateLabel(String labelName)
     {
-        return LABEL_START + labelName + labelCounter + LABEL_END;
+        return LABEL_START + labelName + LABEL_END;
     }
     
     public String generateLabelSymbol(String labelName)
     {
-        return labelName + labelCounter;
+        return labelName;
     }
     
-    public String generateEndLabel()
+    public String generateEndLabel(String tag)
     {
-        return LABEL_START + END_OF_OPERATION_LABEL + labelCounter + LABEL_END;
+        return LABEL_START + END_OF_OPERATION_LABEL + tag + LABEL_END;
     }
     
-    public String generateEndLabelSymbol()
+    public String generateEndLabelSymbol(String tag)
     {
-        return END_OF_OPERATION_LABEL + labelCounter;
+        return END_OF_OPERATION_LABEL + tag;
     }
     
     public void incrementLabelCounter()

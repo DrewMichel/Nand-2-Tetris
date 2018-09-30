@@ -9,10 +9,18 @@ public final class CommandTable
                                C_NEGATE = "neg", C_EQUAL = "eq",
                                C_GREATER = "gt", C_LESSER = "lt", C_AND = "and",
                                C_OR = "or", C_NOT = "not", C_POP = "pop",
-                               C_PUSH = "push", C_INVALID = "Invalid";
+                               C_PUSH = "push", C_LABEL = "label",
+                               C_GOTO = "goto", C_IF_GOTO = "if-goto",
+                               C_FUNCTION = "function", C_CALL = "call",
+                               C_RETURN = "return", C_INVALID = "Invalid";
     // C_COMMAND types
     public static final String C_ARITHMETIC_TYPE = "C_ARITHMETIC",
                                C_POP_TYPE = "C_POP", C_PUSH_TYPE = "C_PUSH",
+                               C_LABEL_TYPE = "C_LABEL", C_GOTO_TYPE = "C_GOTO",
+                               C_IF_GOTO_TYPE = "C_IF_GOTO",
+                               C_FUNCTION_TYPE = "C_FUNCTION",
+                               C_CALL_TYPE = "C_CALL",
+                               C_RETURN_TYPE = "C_RETURN",
                                C_INVALID_TYPE = "C_INVALID";
     
     // Singleton
@@ -61,8 +69,17 @@ public final class CommandTable
         commandMap.put(C_POP, C_POP_TYPE);
         
         // C_PUSH type
-        
         commandMap.put(C_PUSH, C_PUSH_TYPE);
+        
+        // Program flow commands
+        commandMap.put(C_LABEL  , C_LABEL_TYPE);
+        commandMap.put(C_GOTO   , C_GOTO_TYPE);
+        commandMap.put(C_IF_GOTO, C_IF_GOTO_TYPE);
+        
+        // Function calling commands
+        commandMap.put(C_FUNCTION, C_FUNCTION_TYPE);
+        commandMap.put(C_CALL    , C_CALL_TYPE);
+        commandMap.put(C_RETURN  , C_RETURN_TYPE);
     }
     
     public String getCommandType(String command)
