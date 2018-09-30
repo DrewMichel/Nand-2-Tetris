@@ -248,6 +248,10 @@ public class CodeWriter
         {
             writePushStatic(index);
         }
+        else if(segment.equals(PointerTable.POINTER_SEGMENT))
+        {
+            writePushPointer(index);
+        }
     }
     
     // Constant
@@ -255,10 +259,8 @@ public class CodeWriter
     {
         fileWriter.println(ADDRESS_SYMBOL + index); // @ constant value of index
         fileWriter.println("D=A"); // Sets D register = index
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL); // @SP
-        fileWriter.println("M=M+1"); // Increments the value SP points
-        fileWriter.println("A=M-1"); // Goes to the previous value SP pointed to
-        fileWriter.println("M=D"); // Sets value ontop of stack to D (index)
+        
+        writePushBody();
     }
     
     // Push Local, Argument, This, or That's base address + index value
@@ -271,11 +273,7 @@ public class CodeWriter
         fileWriter.println("A=D+M");
         fileWriter.println("D=M");
         
-        // Push value onto stack
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        fileWriter.println("M=M+1");
-        fileWriter.println("A=M-1");
-        fileWriter.println("M=D");
+        writePushBody();
     }
     
     public void writePushTemp(int index)
@@ -284,11 +282,7 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.TEMP_REGISTERS[index]);
         fileWriter.println("D=M");
         
-        // Push value ontop of the stack
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        fileWriter.println("M=M+1");
-        fileWriter.println("A=M-1");
-        fileWriter.println("M=D");
+        writePushBody();
     }
     
     public void writePushStatic(int index)
@@ -297,6 +291,19 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + adjustExtension(getRealName(fileName), PERIOD + index));
         fileWriter.println("D=M");
         
+        writePushBody();
+    }
+    
+    public void writePushPointer(int index)
+    {
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.POINTER_REGISTERS[index]);
+        fileWriter.println("D=M");
+        
+        writePushBody();
+    }
+    
+    public void writePushBody()
+    {
         // Push value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("M=M+1");
@@ -321,6 +328,10 @@ public class CodeWriter
         {
             writePopStatic(index);
         }
+        else if(segment.equals(PointerTable.POINTER_SEGMENT))
+        {
+            writePopPointer(index);
+        }
     }
     
     public void writePopGeneral(String symbol, int index)
@@ -334,10 +345,7 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[0]);
         fileWriter.println("M=D");
         
-        // Acquire value ontop of the stack
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        fileWriter.println("AM=M-1");
-        fileWriter.println("D=M");
+        writePopHeader();
         
         // Move value to segment's base address + index
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[0]);
@@ -347,10 +355,7 @@ public class CodeWriter
     
     public void writePopTemp(String symbol, int index)
     {
-        // Acquire value ontop of the stack
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        fileWriter.println("AM=M-1");
-        fileWriter.println("D=M");
+        writePopHeader();
         
         // Move value to temp segment's base address + index
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.TEMP_REGISTERS[index]);
@@ -359,14 +364,27 @@ public class CodeWriter
     
     public void writePopStatic(int index)
     {
-        // Acquire value ontop of the stack
-        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        fileWriter.println("AM=M-1");
-        fileWriter.println("D=M");
+        writePopHeader();
         
         // Move value to static index
         fileWriter.println(ADDRESS_SYMBOL + adjustExtension(getRealName(fileName), PERIOD + index));
         fileWriter.println("M=D");
+    }
+    
+    public void writePopPointer(int index)
+    {
+        writePopHeader();
+        
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.POINTER_REGISTERS[0]);
+        fileWriter.println("M=D");
+    }
+    
+    public void writePopHeader()
+    {
+        // Acquire value ontop of the stack
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("AM=M-1");
+        fileWriter.println("D=M");
     }
     
     // Closes the output file.
