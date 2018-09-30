@@ -407,11 +407,11 @@ public class CodeWriter
     {
         // TODO: MOVE STACK POINTER?
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
-        fileWriter.println("A=M");
+        fileWriter.println("AM=M-1");
         fileWriter.println("D=M");
         
         fileWriter.println(ADDRESS_SYMBOL + labelName);
-        fileWriter.println("D;JLT");
+        fileWriter.println("D;JNE");
     }
     
     // Closes the output file.
