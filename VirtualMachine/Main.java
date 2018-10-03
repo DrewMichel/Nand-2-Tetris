@@ -105,16 +105,19 @@ public class Main
                     {
                         codeWriter.writeComment(parser.getCurrentCommand());
                         codeWriter.incrementProgramCounter();
+                        codeWriter.writeFunction(parser.segment(), parser.arg2());
                     }
                     else if(parser.getCurrentType().equals(CommandTable.C_CALL_TYPE))
                     {
                         codeWriter.writeComment(parser.getCurrentCommand());
                         codeWriter.incrementProgramCounter();
+                        codeWriter.writeCall(parser.segment(), parser.arg2());
                     }
                     else if(parser.getCurrentType().equals(CommandTable.C_RETURN_TYPE))
                     {
                         codeWriter.writeComment(parser.getCurrentCommand());
                         codeWriter.incrementProgramCounter();
+                        codeWriter.writeReturn();
                     }
                 }
             }

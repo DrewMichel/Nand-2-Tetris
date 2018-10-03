@@ -53,6 +53,17 @@
 // According to coursework:
 // -1 Represents the boolean true
 // 0 Represents the boolean false
+//
+// function g nVars
+// here starts a function called g,
+// which has nVars local variables
+//
+// call g nArgs
+// invoke function g for its effect;
+// nArgs arguments have already been pushed onto the stack
+//
+// return
+// terminate execution and return control to the call
 
 import java.util.HashMap;
 
@@ -89,6 +100,8 @@ public class PointerTable
                                POINTER_SEGMENT = "pointer",
                                TEMP_SEGMENT = "temp";
                                
+    public static final String[] SEGMENT_POINTERS = {LOCAL_SYMBOL, ARGUMENT_SYMBOL, THIS_SYMBOL, THAT_SYMBOL};
+    
     public static final String[] TEMP_REGISTERS = {"R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12"};
     
     public static final String[] GENERAL_PURPOSE_REGISTERS = {"R13", "R14", "R15"};

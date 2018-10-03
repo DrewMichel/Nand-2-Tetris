@@ -10,14 +10,17 @@ public class CodeWriter
     public static final String OUTPUT_FILE_EXTENSION = ".asm",
                                LINE_COMMENT = "//", ADDRESS_SYMBOL = "@",
                                END_OF_OPERATION_LABEL = "END_OF_OPERATION",
-                               LABEL_START = "(", LABEL_END = ")", PERIOD = ".";
+                               LABEL_START = "(", LABEL_END = ")",
+                               PERIOD = ".", CALLER_RETURN_LABEL = "lunchbreak";
+    
+    public static final int NUMBER_OF_CALLER_VALUES = 5;
     
     // Instance variables
     private PointerTable pointerTable;
     private PrintWriter fileWriter;
     private String fileName;
     
-    private int stackPointer, programCounter, labelCounter;
+    private int stackPointer, programCounter, labelCounter, callCounter;
     
     // Constructor
     public CodeWriter(File path)
@@ -40,6 +43,7 @@ public class CodeWriter
             stackPointer = PointerTable.STACK_MIN_VALUE;
             programCounter = 1;
             labelCounter = 1;
+            callCounter = 1;
         }
         catch(IOException e)
         {
@@ -62,6 +66,16 @@ public class CodeWriter
     public void setProgramCounter(int counter)
     {
         programCounter = counter;
+    }
+    
+    public void resetCallCounter()
+    {
+        callCounter = 1;
+    }
+    
+    public void incrementCallCounter()
+    {
+        ++callCounter;
     }
     
     public void writeComment(String comment)
@@ -405,13 +419,136 @@ public class CodeWriter
     
     public void writeIfGoto(String labelName)
     {
-        // TODO: MOVE STACK POINTER?
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("AM=M-1");
         fileWriter.println("D=M");
         
         fileWriter.println(ADDRESS_SYMBOL + labelName);
         fileWriter.println("D;JNE");
+    }
+    
+    public void writeCall(String functionName, int numArgs)
+    {
+        // Pushes label address onto stack
+        fileWriter.println(ADDRESS_SYMBOL + generateLabelSymbol(functionName + CALLER_RETURN_LABEL + callCounter));
+        fileWriter.println("D=A");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=M+1");
+        fileWriter.println("A=M-1");
+        fileWriter.println("M=D");
+        
+        // Push segments LCL, ARG, THIS, then THAT onto stack
+        writePushSegmentPointers();
+        
+        // Reposition ARG = SP - 5 - numArgs
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("D=M");
+        fileWriter.println(ADDRESS_SYMBOL + (NUMBER_OF_CALLER_VALUES + numArgs));
+        fileWriter.println("D=D-A");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.ARGUMENT_SYMBOL);
+        fileWriter.println("M=D");
+        
+        // Reposition LCL = SP
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("D=M");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.LOCAL_SYMBOL);
+        fileWriter.println("M=D");
+        
+        // Goes to the function
+        writeGoto(functionName);
+        
+        // Declares label for return purposes
+        fileWriter.println(generateLabel(functionName + CALLER_RETURN_LABEL + callCounter));
+        
+        incrementCallCounter();
+    }
+    
+    private void writePushSegmentPointers()
+    {
+        for(int i = 0; i < PointerTable.SEGMENT_POINTERS.length; ++i)
+        {
+            // Get pointer value
+            fileWriter.println(ADDRESS_SYMBOL + PointerTable.SEGMENT_POINTERS[i]);
+            fileWriter.println("D=M");
+            
+            // Push pointer onto stack
+            fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+            fileWriter.println("M=M+1");
+            fileWriter.println("A=M-1");
+            fileWriter.println("M=D");
+        }
+    }
+    
+    public void writeReturn()
+    {
+        // *GENERAL_PURPOSE_REGISTERS[1] = endframe
+        // *GENERAL_PURPOSE_REGISTERS[2] = return address
+        
+        // endFrame = LCL, endframe is a temporary variable
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.LOCAL_SYMBOL);
+        fileWriter.println("D=M");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[1]);
+        fileWriter.println("M=D");
+        
+        // return address = *(endFrame - 5), gets the return address
+        fileWriter.println(ADDRESS_SYMBOL + NUMBER_OF_CALLER_VALUES);
+        fileWriter.println("A=D-A");
+        
+        fileWriter.println("D=M");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[2]);
+        fileWriter.println("M=D");
+        
+        // *ARG = pop(), repositions the return value for the caller
+        // Take value ontop of stack and push it to arg 0
+        writePopGeneral(PointerTable.ARGUMENT_SYMBOL, 0);
+        
+        // SP = ARG + 1, repositions the SP of the caller
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.ARGUMENT_SYMBOL);
+        fileWriter.println("D=M+1");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=D");
+        
+        // Pop segments off stack THAT, THIS, ARG, then LCL
+        writePopSegmentPointers();
+        
+        // goto return address
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[2]);
+        fileWriter.println("A=M");
+        fileWriter.println("0;JMP");
+    }
+    
+    private void writePopSegmentPointers()
+    {
+        int offset = 1;
+        
+        for(int i = PointerTable.SEGMENT_POINTERS.length - 1; i >= 0; --i)
+        {
+            // segment[i] = *(endframe - offset)
+            fileWriter.println(ADDRESS_SYMBOL + offset);
+            fileWriter.println("D=A");
+            
+            fileWriter.println(ADDRESS_SYMBOL + PointerTable.GENERAL_PURPOSE_REGISTERS[1]);
+            fileWriter.println("A=M-D");
+            fileWriter.println("D=M");
+            
+            fileWriter.println(ADDRESS_SYMBOL + PointerTable.SEGMENT_POINTERS[i]);
+            fileWriter.println("M=D");
+            
+            ++offset;
+        }
+    }
+    
+    public void writeFunction(String functionName, int numLocals)
+    {
+        // Function entry label
+        fileWriter.println(generateLabel(functionName));
+        
+        // Push 0 onto local segments parameter numLocals amount of times
+        for(int i = 0; i < numLocals; ++i)
+        {
+            writePushConstant(0);
+            writePopGeneral(pointerTable.getGeneralSymbol(PointerTable.LOCAL_SEGMENT), i);
+        }
     }
     
     // Closes the output file.
