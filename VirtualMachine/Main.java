@@ -9,11 +9,12 @@ import java.util.Iterator;
 
 public class Main
 {
-    public static final String[] ARGUMENT_FLAGS = {"-R", "-C"};
+    public static final String[] ARGUMENT_FLAGS = {"-R", "-C", "-N"};
     
     public static void main(String[] args)
     {
         LinkedHashSet<File> regularFiles = new LinkedHashSet<File>();
+        LinkedHashSet<File> directories = new LinkedHashSet<File>();
         HashMap<String, Boolean> flagMap = new HashMap<String, Boolean>();
         
         populateFlagMap(flagMap);
@@ -26,19 +27,199 @@ public class Main
             args = receiveInput().split(" ");
         }
         
-        args = toUpperCaseArray(args);
+        //args = toUpperCaseArray(args);
         
-        processArguments(regularFiles, flagMap, args);
+        //processArguments(regularFiles, flagMap, args);
+        weakProcessArguments(directories, regularFiles, flagMap, args);
         
+        displayFiles(directories);
         displayFiles(regularFiles);
-        
-        System.out.println("Detected: " + regularFiles.size() + " valid files.");
         
         System.out.println("Beginning file translation...");
         
-        processFiles(regularFiles, flagMap);
+        //processFiles(regularFiles, flagMap);
+        weakProcess(directories, regularFiles, flagMap);
         
         System.out.println("Virtual Machine translator ending.");
+    }
+    
+    public static void weakProcessArguments(LinkedHashSet<File> directories, LinkedHashSet<File> regularFiles, HashMap<String, Boolean> flagMap, String[] args)
+    {
+        File currentFile;
+        
+        for(int i = 0; i < args.length; ++i)
+        {
+            currentFile = new File(args[i]);
+            
+            if(currentFile.exists())
+            {
+                if(currentFile.isDirectory())
+                {
+                    directories.add(currentFile);
+                }
+                else if(currentFile.isFile())
+                {
+                    regularFiles.add(currentFile);
+                }
+            }
+            else if(flagMap.containsKey(args[i].toUpperCase()))
+            {
+                flagMap.put(args[i].toUpperCase(), true);
+            }
+        }
+    }
+    
+    public static void weakProcess(LinkedHashSet<File> directories, LinkedHashSet<File> files, HashMap<String, Boolean> flagMap)
+    {
+        weakProcessDirectories(directories, flagMap);
+        weakProcessFiles(files, flagMap);
+    }
+    
+    public static void weakProcessDirectories(LinkedHashSet<File> directories, HashMap<String, Boolean> flagMap)
+    {
+        File[] directoryFiles;
+        File currentDirectory;
+        String directoryName, currentFileName;
+        Iterator<File> iterator = directories.iterator();
+        
+        while(iterator.hasNext())
+        {
+            Parser parser = new Parser();
+            CodeWriter codeWriter = new CodeWriter();
+            
+            currentDirectory = iterator.next();
+            
+            directoryName = currentDirectory.getAbsolutePath();
+            
+            directoryFiles = currentDirectory.listFiles();
+            
+            for(int i = 0; i < directoryFiles.length; ++i)
+            {
+                currentFileName = directoryFiles[i].getAbsolutePath();
+                
+                if(Parser.hasValidFileExtension(currentFileName))
+                {
+                    parser.initialize(new File(currentFileName));
+                    
+                    if(!codeWriter.isInitialized())
+                    {
+                        codeWriter.initialize(new File(directoryName + File.separator + CodeWriter.getRealName(directoryName) + CodeWriter.OUTPUT_FILE_EXTENSION));
+                        codeWriter.setDirectoryName(directoryName);
+                        
+                        if(!flagMap.get(ARGUMENT_FLAGS[2]))
+                        {
+                            codeWriter.writeFileHeader();
+                        }
+                    }
+                    
+                    codeWriter.setFileName(currentFileName);
+                    
+                    process(parser, codeWriter);
+                    
+                    parser.close();
+                }
+            }
+            
+            codeWriter.close();
+        }
+    }
+    
+    public static void weakProcessFiles(LinkedHashSet<File> files, HashMap<String, Boolean> flagMap)
+    {
+        Iterator<File> iterator = files.iterator();
+        File currentFile;
+        String currentFileName;
+        
+        while(iterator.hasNext())
+        {
+            Parser parser = new Parser();
+            CodeWriter codeWriter = new CodeWriter();
+            
+            currentFile = iterator.next();
+            
+            currentFileName = currentFile.getAbsolutePath();
+            
+            if(Parser.hasValidFileExtension(currentFileName))
+            {
+                parser.initialize(new File(currentFileName));
+                codeWriter.initialize(new File(CodeWriter.adjustExtension(currentFileName, CodeWriter.OUTPUT_FILE_EXTENSION)));
+                
+                if(!flagMap.get(ARGUMENT_FLAGS[2]))
+                {
+                    codeWriter.writeFileHeader();
+                }
+                
+                process(parser, codeWriter);
+            }
+            
+            parser.close();
+            codeWriter.close();
+        }
+    }
+    
+    public static void process(Parser parser, CodeWriter codeWriter)
+    {
+        while(parser.hasMoreCommands())
+        {
+            parser.advance();
+            
+            parser.commandType();
+            
+            if(parser.getCurrentType().equals(CommandTable.C_ARITHMETIC_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeArithmetic(parser.getCurrentCommand());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_POP_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writePop(parser.segment(), parser.arg2());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_PUSH_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writePush(parser.segment(), parser.arg2());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_LABEL_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeLabel(parser.segment());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_GOTO_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeGoto(parser.segment());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_IF_GOTO_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeIfGoto(parser.segment());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_FUNCTION_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeFunction(parser.segment(), parser.arg2());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_CALL_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeCall(parser.segment(), parser.arg2());
+            }
+            else if(parser.getCurrentType().equals(CommandTable.C_RETURN_TYPE))
+            {
+                codeWriter.writeComment(parser.getCurrentCommand());
+                codeWriter.incrementProgramCounter();
+                codeWriter.writeReturn();
+            }
+        }
     }
     
     public static void processFiles(LinkedHashSet<File> files, HashMap<String, Boolean> flags)
@@ -59,67 +240,7 @@ public class Main
                 parser = new Parser(currentFile);
                 codeWriter = new CodeWriter(CodeWriter.adjustExtension(currentFile, CodeWriter.OUTPUT_FILE_EXTENSION));
                 
-                while(parser.hasMoreCommands())
-                {
-                    parser.advance();
-                    
-                    parser.commandType();
-                    
-                    if(parser.getCurrentType().equals(CommandTable.C_ARITHMETIC_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeArithmetic(parser.getCurrentCommand());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_POP_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writePop(parser.segment(), parser.arg2());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_PUSH_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writePush(parser.segment(), parser.arg2());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_LABEL_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeLabel(parser.segment());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_GOTO_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeGoto(parser.segment());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_IF_GOTO_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeIfGoto(parser.segment());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_FUNCTION_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeFunction(parser.segment(), parser.arg2());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_CALL_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeCall(parser.segment(), parser.arg2());
-                    }
-                    else if(parser.getCurrentType().equals(CommandTable.C_RETURN_TYPE))
-                    {
-                        codeWriter.writeComment(parser.getCurrentCommand());
-                        codeWriter.incrementProgramCounter();
-                        codeWriter.writeReturn();
-                    }
-                }
+                process(parser, codeWriter);
             }
             
             codeWriter.close();
@@ -149,9 +270,9 @@ public class Main
         {
             currentFile = new File(args[i]);
             
-            if(flags.containsKey(args[i]))
+            if(flags.containsKey(args[i].toUpperCase()))
             {
-                flags.put(args[i], true);
+                flags.put(args[i].toUpperCase(), true);
             }
             else if(currentFile.exists())
             {

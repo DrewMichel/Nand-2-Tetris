@@ -100,7 +100,9 @@ public class PointerTable
                                POINTER_SEGMENT = "pointer",
                                TEMP_SEGMENT = "temp";
                                
-    public static final String[] SEGMENT_POINTERS = {LOCAL_SYMBOL, ARGUMENT_SYMBOL, THIS_SYMBOL, THAT_SYMBOL};
+    public static final int[] DEFAULT_SEGMENT_VALUES = {STACK_MIN_VALUE, LOCAL_MIN_VALUE, ARGUMENT_MIN_VALUE, THIS_MIN_VALUE, THAT_MIN_VALUE};
+                               
+    public static final String[] SEGMENT_POINTERS = {STACK_SYMBOL, LOCAL_SYMBOL, ARGUMENT_SYMBOL, THIS_SYMBOL, THAT_SYMBOL};
     
     public static final String[] TEMP_REGISTERS = {"R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12"};
     

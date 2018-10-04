@@ -11,18 +11,25 @@ public class CodeWriter
                                LINE_COMMENT = "//", ADDRESS_SYMBOL = "@",
                                END_OF_OPERATION_LABEL = "END_OF_OPERATION",
                                LABEL_START = "(", LABEL_END = ")",
-                               PERIOD = ".", CALLER_RETURN_LABEL = "lunchbreak";
+                               PERIOD = ".", CALLER_RETURN_LABEL = "lunchbreak",
+                               SYSTEM_INITIALIZATION_LABEL = "Sys.init";
     
     public static final int NUMBER_OF_CALLER_VALUES = 5;
     
     // Instance variables
     private PointerTable pointerTable;
     private PrintWriter fileWriter;
-    private String fileName;
+    private String fileName, directoryName;
+    private boolean initialized;
     
     private int stackPointer, programCounter, labelCounter, callCounter;
     
     // Constructor
+    public CodeWriter()
+    {
+        
+    }
+    
     public CodeWriter(File path)
     {
         initialize(path);
@@ -33,7 +40,7 @@ public class CodeWriter
         initialize(new File(path));
     }
     
-    private void initialize(File path)
+    public void initialize(File path)
     {
         try
         {
@@ -44,6 +51,7 @@ public class CodeWriter
             programCounter = 1;
             labelCounter = 1;
             callCounter = 1;
+            initialized = true;
         }
         catch(IOException e)
         {
@@ -52,10 +60,30 @@ public class CodeWriter
         }
     }
     
+    public boolean isInitialized()
+    {
+        return initialized;
+    }
+    
     // Returns String fileName instance variable
     public String getFileName()
     {
         return fileName;
+    }
+    
+    public void setFileName(String name)
+    {
+        fileName = name;
+    }
+    
+    public void setDirectoryName(String name)
+    {
+        directoryName = name;
+    }
+    
+    public String getDirectoryName()
+    {
+        return directoryName;
     }
     
     public void incrementProgramCounter()
@@ -76,6 +104,31 @@ public class CodeWriter
     public void incrementCallCounter()
     {
         ++callCounter;
+    }
+    
+    public void writeFileHeader()
+    {
+        // Initialize segments
+        //writeSegmentHeader();
+        
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_MIN_VALUE);
+        fileWriter.println("D=A");
+        fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
+        fileWriter.println("M=D");
+        
+        writeGoto(SYSTEM_INITIALIZATION_LABEL);
+    }
+    
+    private void writeSegmentHeader()
+    {
+        // Initializes stack, local, argument, this, and that pointers
+        for(int i = 0; i < PointerTable.SEGMENT_POINTERS.length; ++i)
+        {
+            fileWriter.println(ADDRESS_SYMBOL + PointerTable.DEFAULT_SEGMENT_VALUES[i]);
+            fileWriter.println("D=A");
+            fileWriter.println(ADDRESS_SYMBOL + PointerTable.SEGMENT_POINTERS[i]);
+            fileWriter.println("M=D");
+        }
     }
     
     public void writeComment(String comment)
@@ -465,7 +518,7 @@ public class CodeWriter
     
     private void writePushSegmentPointers()
     {
-        for(int i = 0; i < PointerTable.SEGMENT_POINTERS.length; ++i)
+        for(int i = 1; i < PointerTable.SEGMENT_POINTERS.length; ++i)
         {
             // Get pointer value
             fileWriter.println(ADDRESS_SYMBOL + PointerTable.SEGMENT_POINTERS[i]);
@@ -521,7 +574,7 @@ public class CodeWriter
     {
         int offset = 1;
         
-        for(int i = PointerTable.SEGMENT_POINTERS.length - 1; i >= 0; --i)
+        for(int i = PointerTable.SEGMENT_POINTERS.length - 1; i >= 1; --i)
         {
             // segment[i] = *(endframe - offset)
             fileWriter.println(ADDRESS_SYMBOL + offset);
@@ -560,6 +613,8 @@ public class CodeWriter
         {
             fileWriter.close();
         }
+        
+        initialized = false;
     }
     
     public static String adjustExtension(File path, String extension)

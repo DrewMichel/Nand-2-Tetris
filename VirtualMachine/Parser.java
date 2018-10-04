@@ -20,6 +20,11 @@ public class Parser
     private CommandTable commandTable;
     
     // Constructor
+    public Parser()
+    {
+        
+    }
+    
     public Parser(File path)
     {
         initialize(path);
@@ -30,7 +35,15 @@ public class Parser
         initialize(new File(path));
     }
     
-    private void initialize(File path)
+    public void close()
+    {
+        if(fileScanner != null)
+        {
+            fileScanner.close();
+        }
+    }
+    
+    public void initialize(File path)
     {
         try
         {
