@@ -29,11 +29,13 @@ public final class CommandTable
     // Instance variables
     private HashMap<String, String> commandMap;
     
+    // Constructor
     private CommandTable()
     {
         populateCommander();
     }
     
+    // Returns singleton object
     public static CommandTable getCommandTable()
     {
         if(commander == null)
@@ -82,6 +84,8 @@ public final class CommandTable
         commandMap.put(C_RETURN  , C_RETURN_TYPE);
     }
     
+    // Returns the String value associated with String parameter command
+    // within instance variable commandMap
     public String getCommandType(String command)
     {
         if(command != null && commandMap.containsKey(command))

@@ -1,4 +1,11 @@
 // Main entry point
+//
+// Argument Flags:
+// -R: Disabled. Recursively searches sub directories. 
+// -C: Disabled. Causes directories to translate into a single file.
+// -N: Enabled. No file header is written. Necessary for all files except
+//              StaticsTest and FibonacciElement
+//              (not to be confused with FibonacciSeries)
 
 import java.util.ArrayList;
 import java.io.File;
@@ -9,8 +16,12 @@ import java.util.Iterator;
 
 public class Main
 {
+    // Constants
     public static final String[] ARGUMENT_FLAGS = {"-R", "-C", "-N"};
     
+    // Methods
+    
+    // Main method
     public static void main(String[] args)
     {
         LinkedHashSet<File> regularFiles = new LinkedHashSet<File>();
@@ -43,6 +54,7 @@ public class Main
         System.out.println("Virtual Machine translator ending.");
     }
     
+    // Processes arguments into directories, files, and flags
     public static void weakProcessArguments(LinkedHashSet<File> directories, LinkedHashSet<File> regularFiles, HashMap<String, Boolean> flagMap, String[] args)
     {
         File currentFile;
@@ -69,12 +81,14 @@ public class Main
         }
     }
     
+    // Translates directories and files
     public static void weakProcess(LinkedHashSet<File> directories, LinkedHashSet<File> files, HashMap<String, Boolean> flagMap)
     {
         weakProcessDirectories(directories, flagMap);
         weakProcessFiles(files, flagMap);
     }
     
+    // Translates files within directories into a single file
     public static void weakProcessDirectories(LinkedHashSet<File> directories, HashMap<String, Boolean> flagMap)
     {
         File[] directoryFiles;
@@ -124,6 +138,7 @@ public class Main
         }
     }
     
+    // Translates files
     public static void weakProcessFiles(LinkedHashSet<File> files, HashMap<String, Boolean> flagMap)
     {
         Iterator<File> iterator = files.iterator();
@@ -157,6 +172,7 @@ public class Main
         }
     }
     
+    // Parses over a file and translates then writes each line
     public static void process(Parser parser, CodeWriter codeWriter)
     {
         while(parser.hasMoreCommands())
@@ -222,6 +238,7 @@ public class Main
         }
     }
     
+    // Translates files
     public static void processFiles(LinkedHashSet<File> files, HashMap<String, Boolean> flags)
     {
         if(files != null)
@@ -247,6 +264,7 @@ public class Main
         }
     }
     
+    // Displays file paths
     public static void displayFiles(LinkedHashSet<File> files)
     {
         if(files != null)
@@ -260,6 +278,7 @@ public class Main
         }
     }
     
+    // Processes arguments into files, directories, and flags
     public static void processArguments(LinkedHashSet<File> files, HashMap<String, Boolean> flags, String[] args)
     {
         LinkedHashSet<File> allDirectories = new LinkedHashSet<File>();
@@ -290,6 +309,7 @@ public class Main
         accessDirectoryFiles(files, allDirectories, flags);
     }
     
+    // Pulls files within directories
     public static void accessDirectoryFiles(LinkedHashSet<File> files, LinkedHashSet<File> directories, HashMap<String, Boolean> flags)
     {
         LinkedHashSet<File> innerDirectories = new LinkedHashSet<File>();
@@ -297,6 +317,7 @@ public class Main
         addDirectoryFiles(files, directories, innerDirectories, flags);
     }
     
+    // Adds all files within a directory into the LinkedHashSet<File> files parameter
     private static void addDirectoryFiles(LinkedHashSet<File> files, LinkedHashSet<File> allDirectories, LinkedHashSet<File> currentDirectories, HashMap<String, Boolean> flags)
     {
         Iterator<File> directoryIterator = allDirectories.iterator();
@@ -332,6 +353,7 @@ public class Main
         addInnerDirectoryFiles(files, allDirectories, currentDirectories, flags);
     }
     
+    // Recursively adds files within sub directories
     private static void addInnerDirectoryFiles(LinkedHashSet<File> files, LinkedHashSet<File> allDirectories, LinkedHashSet<File> currentDirectories, HashMap<String, Boolean> flags)
     {
         if(flags.get(ARGUMENT_FLAGS[0]) && !currentDirectories.isEmpty())
@@ -372,6 +394,8 @@ public class Main
         }
     }
     
+    // Populates flagMap parameter with ARGUMENT_FALSE elements as keys
+    // and false as values
     public static HashMap<String, Boolean> populateFlagMap(HashMap<String, Boolean> flagMap)
     {
         for(int i = 0; i < ARGUMENT_FLAGS.length; ++i)
@@ -382,11 +406,13 @@ public class Main
         return flagMap;
     }
     
+    // Returns a line
     public static String receiveInput()
     {
         return new Scanner(System.in).nextLine();
     }
     
+    // Loops over an array of Strings and converts each element to uppercase
     public static String[] toUpperCaseArray(String[] array)
     {
         if(array != null)

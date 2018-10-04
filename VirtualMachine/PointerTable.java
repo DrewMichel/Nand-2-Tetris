@@ -69,6 +69,8 @@ import java.util.HashMap;
 
 public class PointerTable
 {   
+    // Constants
+    
     // Pointer addresses
     public static final int STACK_POINTER = 0, LOCAL_POINTER = 1,
                             ARGUMENT_POINTER = 2, THIS_POINTER = 3,
@@ -114,14 +116,17 @@ public class PointerTable
     public static final String INVALID_POINTER = "INVALID POINTER ADDRESS",
                                INVALID_SEGMENT = "INVALID SEGMENT NAME";
     
+    // Instance variables
     private HashMap<String, String> generalSegmentMap;
     private HashMap<String, Integer> generalValueMap;
     
+    // Constructor
     public PointerTable()
     {
         initialize();
     }
     
+    // Initializes instance variables with segments and values
     private void initialize()
     {
         generalSegmentMap = new HashMap<String, String>();
@@ -138,21 +143,28 @@ public class PointerTable
         generalValueMap.put(THAT_SYMBOL, THAT_MIN_VALUE);
     }
     
+    // Returns true if generalSegmentMap contains String parameter segment key
+    // Otherwise, returns false
     public boolean containsGeneralSegment(String segment)
     {
         return generalSegmentMap.containsKey(segment);
     }
     
+    // Returns String key associated with String parameter segment
+    // within instance variable generalSegmentMap
     public String getGeneralSymbol(String segment)
     {
         return generalSegmentMap.get(segment);
     }
     
+    // Returns true if generalValueMap contains String parameter symbol key
     public boolean containsGeneralSymbol(String symbol)
     {
         return generalValueMap.containsKey(symbol);
     }
     
+    // Returns int key associated with String parameter symbol
+    // within instance variable generalValueMap
     public int getGeneralValue(String symbol)
     {
         return generalValueMap.get(symbol);

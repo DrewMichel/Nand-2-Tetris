@@ -21,10 +21,9 @@ public class CodeWriter
     private PrintWriter fileWriter;
     private String fileName, directoryName;
     private boolean initialized;
-    
     private int stackPointer, programCounter, labelCounter, callCounter;
     
-    // Constructor
+    // Constructors
     public CodeWriter()
     {
         
@@ -40,6 +39,10 @@ public class CodeWriter
         initialize(new File(path));
     }
     
+    // Methods
+    
+    // Initializes instance variables and opens fileWriter instance variable
+    // to File parameter path
     public void initialize(File path)
     {
         try
@@ -60,6 +63,9 @@ public class CodeWriter
         }
     }
     
+    // Methods
+    
+    // Returns instance variable initialized
     public boolean isInitialized()
     {
         return initialized;
@@ -71,68 +77,63 @@ public class CodeWriter
         return fileName;
     }
     
+    // Sets instance variable fileName to String parameter name
     public void setFileName(String name)
     {
         fileName = name;
     }
     
+    // Sets instance variable directoryName to String parameter name
     public void setDirectoryName(String name)
     {
         directoryName = name;
     }
     
+    // Returns instance variable directoryName
     public String getDirectoryName()
     {
         return directoryName;
     }
     
+    // Increments instance variable programCounter by one
     public void incrementProgramCounter()
     {
         ++programCounter;
     }
     
+    // Sets instance variable programCounter to int parameter counter
     public void setProgramCounter(int counter)
     {
         programCounter = counter;
     }
     
+    // Resets instance variable programCounter to one
     public void resetCallCounter()
     {
         callCounter = 1;
     }
     
+    // Increments instance variable callCounter by one
     public void incrementCallCounter()
     {
         ++callCounter;
     }
     
+    // Writes file header to file.
+    // Should only be used for StaticsTest and FibonacciElements
     public void writeFileHeader()
     {
-        // Initialize segments
-        //writeSegmentHeader();
-        
+        // Initializes stack pointer
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_MIN_VALUE);
         fileWriter.println("D=A");
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("M=D");
-        
-        //writeGoto(SYSTEM_INITIALIZATION_LABEL);
 
+        // Calls Sys.init
         writeCall(SYSTEM_INITIALIZATION_LABEL, 0);
     }
     
-    private void writeSegmentHeader()
-    {
-        // Initializes stack, local, argument, this, and that pointers
-        for(int i = 0; i < PointerTable.SEGMENT_POINTERS.length; ++i)
-        {
-            fileWriter.println(ADDRESS_SYMBOL + PointerTable.DEFAULT_SEGMENT_VALUES[i]);
-            fileWriter.println("D=A");
-            fileWriter.println(ADDRESS_SYMBOL + PointerTable.SEGMENT_POINTERS[i]);
-            fileWriter.println("M=D");
-        }
-    }
-    
+    // Writes String parameter comment as a comment
     public void writeComment(String comment)
     {
         fileWriter.println(LINE_COMMENT + " " + programCounter + ": " + comment);
@@ -185,6 +186,8 @@ public class CodeWriter
         }
     }
     
+    // Adds the top two elements ontop of the stack together
+    // and places the sum at the lower address
     public void writeArithmeticAddition()
     {
         writeOperationHeader();
@@ -192,6 +195,8 @@ public class CodeWriter
         fileWriter.println("M=D+M");
     }
     
+    // Subtracts the highest element on the stack from the next element
+    // and places the difference at the lower address
     public void writeArithmeticSubtract()
     {
         writeOperationHeader();
@@ -199,14 +204,19 @@ public class CodeWriter
         fileWriter.println("M=M-D");
     }
     
+    // Negates the value at the top of the stack
+    // without moving the stack pointer
     public void writeArithmeticNegate()
     {
-        // Negate value at the top of the stack
+        
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("A=M-1"); // leaving stack pointer at original position
         fileWriter.println("M=-M"); // Sets memory ontop of stack to its negative
     }
     
+    // Writes -1 if the two top elements are equal
+    // Writes 0 if they are not equal
+    // The value is written onto the lower address
     public void writeArithmeticEqual(String labelName)
     {
         writeLogicalHeader(labelName);
@@ -216,6 +226,10 @@ public class CodeWriter
         writeLogicalBody(labelName);
     }
     
+    // Writes -1 if the the second element ontop of the stack
+    // is greater than the top element on the stack
+    // Writes 0 if they are equal or if the second is less than the top
+    // The value is written onto the lower address
     public void writeArithmeticGreater(String labelName)
     {
         writeLogicalHeader(labelName);
@@ -225,6 +239,10 @@ public class CodeWriter
         writeLogicalBody(labelName);
     }
     
+    // Writes -1 if the the second element ontop of the stack
+    // is less than the top element on the stack
+    // Writes 0 if they are equal or if the second is greater than the top
+    // The value is written onto the lower address
     public void writeArithmeticLesser(String labelName)
     {
         writeLogicalHeader(labelName);
@@ -234,6 +252,8 @@ public class CodeWriter
         writeLogicalBody(labelName);
     }
     
+    // Performs a bitwise 'and' operation on the top two elements on the stack
+    // The value is written onto the lower address
     public void writeArithmeticAnd()
     {
         writeOperationHeader();
@@ -241,6 +261,8 @@ public class CodeWriter
         fileWriter.println("M=D&M");
     }
     
+    // Perfroms a bitwise 'or' operation on the top two elements on the stack
+    // The value is written onto the lower address
     public void writeArithmeticOr()
     {
         writeOperationHeader();
@@ -248,6 +270,8 @@ public class CodeWriter
         fileWriter.println("M=D|M");
     }
     
+    // Performs a bitwise 'not' on the top element on the stack
+    // Without moving the stack pointer
     public void writeArithmeticNot()
     {
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
@@ -255,7 +279,8 @@ public class CodeWriter
         fileWriter.println("M=!M");
     }
     
-    public void writeOperationHeader()
+    // Acquires the value ontop of the stack and reduces the stack pointer
+    private void writeOperationHeader()
     {
         // Acquire value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
@@ -265,7 +290,8 @@ public class CodeWriter
         fileWriter.println("A=A-1");
     }
     
-    public void writeLogicalHeader(String labelName)
+    // Prepares labels, A, D, and stack pointer for logical writes
+    private void writeLogicalHeader(String labelName)
     {
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("AM=M-1");
@@ -279,11 +305,13 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + generateLabelSymbol(labelName + labelCounter));
     }
     
-    public void writeLogicalBody(String labelName)
+    // Called after writeLogicalHeader with a jump command to put -1 (true)
+    // or 0 (false) onto the stack
+    private void writeLogicalBody(String labelName)
     {
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("A=M"); 
-        fileWriter.println("M=" + PointerTable.FALSE_VALUE);// false, not equal
+        fileWriter.println("M=" + PointerTable.FALSE_VALUE);
         fileWriter.println(ADDRESS_SYMBOL + generateEndLabelSymbol(Integer.toString(labelCounter)));
         fileWriter.println("0;JMP");
         
@@ -327,7 +355,7 @@ public class CodeWriter
         }
     }
     
-    // Constant
+    // Pushes int parameter index onto the stack and increases the stack pointer
     public void writePushConstant(int index)
     {
         fileWriter.println(ADDRESS_SYMBOL + index); // @ constant value of index
@@ -336,7 +364,8 @@ public class CodeWriter
         writePushBody();
     }
     
-    // Push Local, Argument, This, or That's base address + index value
+    // Pushes value from Local, Argument, This, or That's
+    // base address + index value onto the stack and increases stack pointer
     public void writePushGeneral(String symbol, int index)
     {
         // Acquire value at symbol's base address + index
@@ -349,6 +378,8 @@ public class CodeWriter
         writePushBody();
     }
     
+    // Pushes value from temp register # index onto the stack
+    // and increases stack pointer
     public void writePushTemp(int index)
     {
         // Acquire value at temp base address + index
@@ -358,6 +389,8 @@ public class CodeWriter
         writePushBody();
     }
     
+    // Pushes value from static base address + index onto the stack
+    // and increases stack pointer
     public void writePushStatic(int index)
     {
         // Acquire value at static index
@@ -367,6 +400,8 @@ public class CodeWriter
         writePushBody();
     }
     
+    // Pushes this or that pointer's value onto the stack
+    // Increases stack pointer
     public void writePushPointer(int index)
     {
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.POINTER_REGISTERS[index]);
@@ -375,7 +410,8 @@ public class CodeWriter
         writePushBody();
     }
     
-    public void writePushBody()
+    // Pushes D's value onto the stack and increases stack pointer
+    private void writePushBody()
     {
         // Push value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
@@ -407,6 +443,8 @@ public class CodeWriter
         }
     }
     
+    // Writes value ontop of the stack onto local, argument, this, or that
+    // base address + index and decreases stack pointer
     public void writePopGeneral(String symbol, int index)
     {
         // Set general register to symbol's base address + index
@@ -426,6 +464,8 @@ public class CodeWriter
         fileWriter.println("M=D");
     }
     
+    // Writes value ontop of the stack onto temp # index
+    // and decreases stack pointer
     public void writePopTemp(String symbol, int index)
     {
         writePopHeader();
@@ -435,6 +475,8 @@ public class CodeWriter
         fileWriter.println("M=D");
     }
     
+    // Writes value ontop of the stack onto static
+    // and decreases stack pointer
     public void writePopStatic(int index)
     {
         writePopHeader();
@@ -444,6 +486,8 @@ public class CodeWriter
         fileWriter.println("M=D");
     }
     
+    // Writes value ontop of the stack onto this or that
+    // and decreases stack pointer
     public void writePopPointer(int index)
     {
         writePopHeader();
@@ -453,7 +497,8 @@ public class CodeWriter
         
     }
     
-    public void writePopHeader()
+    // Decreases stack pointer and acquires value ontop of the stack
+    private void writePopHeader()
     {
         // Acquire value ontop of the stack
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
@@ -461,17 +506,20 @@ public class CodeWriter
         fileWriter.println("D=M");
     }
     
+    // Writes label to file
     public void writeLabel(String labelName)
     {
         fileWriter.println(generateLabel(labelName));
     }
     
+    // Writes goto String parameter labelName
     public void writeGoto(String labelName)
     {
         fileWriter.println(ADDRESS_SYMBOL + labelName);
         fileWriter.println("0;JMP");
     }
     
+    // Write if-goto String parameter labelName
     public void writeIfGoto(String labelName)
     {
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
@@ -482,6 +530,7 @@ public class CodeWriter
         fileWriter.println("D;JNE");
     }
     
+    // Writes function call
     public void writeCall(String functionName, int numArgs)
     {
         // Pushes label address onto stack
@@ -518,6 +567,7 @@ public class CodeWriter
         incrementCallCounter();
     }
     
+    // Pushes local, argument, this, and that pointers onto stack
     private void writePushSegmentPointers()
     {
         for(int i = 1; i < PointerTable.SEGMENT_POINTERS.length; ++i)
@@ -534,6 +584,7 @@ public class CodeWriter
         }
     }
     
+    // Writes function return
     public void writeReturn()
     {
         // *GENERAL_PURPOSE_REGISTERS[1] = endframe
@@ -572,6 +623,7 @@ public class CodeWriter
         fileWriter.println("0;JMP");
     }
     
+    // Pops that, this, argument, and local pointers off the stack
     private void writePopSegmentPointers()
     {
         int offset = 1;
@@ -593,6 +645,8 @@ public class CodeWriter
         }
     }
     
+    // Writes function label and pushes zeroes onto the stack based on
+    // int parameter numLocals
     public void writeFunction(String functionName, int numLocals)
     {
         // Function entry label
@@ -619,11 +673,15 @@ public class CodeWriter
         initialized = false;
     }
     
+    // Returns a String containing File parameter path's name with
+    // String parameter extension
     public static String adjustExtension(File path, String extension)
     {
         return adjustExtension(path.getAbsolutePath(), extension);
     }
     
+    // Returns a String containing String parameter path's name with
+    // String parameter extension
     public static String adjustExtension(String path, String extension)
     {
         int index = -1;
@@ -649,11 +707,15 @@ public class CodeWriter
         return out;
     }
     
+    // Returns a String containing File parameter path's name without
+    // parent directories
     public static String getRealName(File path)
     {
         return getRealName(path.getAbsolutePath());
     }
     
+    // Returns a String containing String parameter path's name without
+    // parent directories
     public static String getRealName(String path)
     {
         String name = path;
@@ -680,26 +742,32 @@ public class CodeWriter
         return name;
     }
     
+    // Returns a String label with String parameter labelName
     public String generateLabel(String labelName)
     {
         return LABEL_START + labelName + LABEL_END;
     }
     
+    // Useless method that doesn't do anything since labelCounter isn't
+    // concatenated with String parameter labelName
     public String generateLabelSymbol(String labelName)
     {
         return labelName;
     }
     
+    // Returns a String end label with String parameter tag
     public String generateEndLabel(String tag)
     {
         return LABEL_START + END_OF_OPERATION_LABEL + tag + LABEL_END;
     }
     
+    // Returns a String end label symbol with String parameter tag
     public String generateEndLabelSymbol(String tag)
     {
         return END_OF_OPERATION_LABEL + tag;
     }
     
+    // Increments instance variable labelCounter by one
     public void incrementLabelCounter()
     {
         ++labelCounter;

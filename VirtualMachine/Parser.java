@@ -19,7 +19,7 @@ public class Parser
     private String fileName, currentCommand, currentType;
     private CommandTable commandTable;
     
-    // Constructor
+    // Constructors
     public Parser()
     {
         
@@ -35,6 +35,9 @@ public class Parser
         initialize(new File(path));
     }
     
+    // Methods
+    
+    // Closes instance variable fileScanner
     public void close()
     {
         if(fileScanner != null)
@@ -43,6 +46,8 @@ public class Parser
         }
     }
     
+    // Initializes instance variables and opens fileScanner to
+    // File parameter path
     public void initialize(File path)
     {
         try
@@ -99,11 +104,13 @@ public class Parser
         }
     }
     
+    // Returns instance variable currentType
     public String getCurrentType()
     {
         return currentType;
     }
     
+    // Returns instance variable currentCommand
     public String getCurrentCommand()
     {
         return currentCommand;
@@ -158,6 +165,7 @@ public class Parser
         return INVALID_ARGUMENT_VALUE;
     }
     
+    // Returns a String based on String parameter original but without comments
     public static String clearCommentation(String original)
     {
         String out = original;
@@ -216,6 +224,7 @@ public class Parser
         return builder.toString();
     }
     
+    // Returns true if String parameter original contains only digits
     public static boolean isDigits(String original)
     {
         if(original == null || 1 > original.length())
@@ -234,6 +243,8 @@ public class Parser
         return true;
     }
     
+    // Returns a Strings with all characters from String parameter original
+    // except whitespace characters
     public static String clearWhitespace(String original)
     {
         StringBuilder builder = new StringBuilder();
@@ -257,6 +268,8 @@ public class Parser
         return builder.toString();
     }
     
+    // Returns true if File parameter path ends with a valid file extension
+    // Otherwise, returns false
     public static boolean hasValidFileExtension(File path)
     {
         if(path != null && path.exists())
@@ -275,11 +288,14 @@ public class Parser
         return false;
     }
     
+    // Returns true if File parameter path ends with a valid file extension
+    // Otherwise, returns false
     public static boolean hasValidFileExtension(String path)
     {
         return hasValidFileExtension(new File(path));
     }
     
+    // Returns a String containing the file extension from File parameter path
     public static String getFileExtension(File path)
     {
         String out = null;
@@ -298,6 +314,7 @@ public class Parser
         return out;
     }
     
+    // Returns a String containing the file extension from File parameter path
     public static String getFileExtension(String path)
     {
         return getFileExtension(new File(path));
