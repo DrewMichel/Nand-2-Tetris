@@ -116,7 +116,9 @@ public class CodeWriter
         fileWriter.println(ADDRESS_SYMBOL + PointerTable.STACK_SYMBOL);
         fileWriter.println("M=D");
         
-        writeGoto(SYSTEM_INITIALIZATION_LABEL);
+        //writeGoto(SYSTEM_INITIALIZATION_LABEL);
+
+        writeCall(SYSTEM_INITIALIZATION_LABEL, 0);
     }
     
     private void writeSegmentHeader()

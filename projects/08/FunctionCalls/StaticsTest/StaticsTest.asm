@@ -2,8 +2,49 @@
 D=A
 @SP
 M=D
+@Sys.initlunchbreak1
+D=A
+@SP
+M=M+1
+A=M-1
+M=D
+@LCL
+D=M
+@SP
+M=M+1
+A=M-1
+M=D
+@ARG
+D=M
+@SP
+M=M+1
+A=M-1
+M=D
+@THIS
+D=M
+@SP
+M=M+1
+A=M-1
+M=D
+@THAT
+D=M
+@SP
+M=M+1
+A=M-1
+M=D
+@SP
+D=M
+@5
+D=D-A
+@ARG
+M=D
+@SP
+D=M
+@LCL
+M=D
 @Sys.init
 0;JMP
+(Sys.initlunchbreak1)
 // 1: function Class1.set 0
 (Class1.set)
 // 2: push argument 0
@@ -379,7 +420,7 @@ M=M+1
 A=M-1
 M=D
 // 28: call Class1.set 2
-@Class1.setlunchbreak1
+@Class1.setlunchbreak2
 D=A
 @SP
 M=M+1
@@ -421,7 +462,7 @@ D=M
 M=D
 @Class1.set
 0;JMP
-(Class1.setlunchbreak1)
+(Class1.setlunchbreak2)
 // 29: pop temp 0
 @SP
 AM=M-1
@@ -443,7 +484,7 @@ M=M+1
 A=M-1
 M=D
 // 32: call Class2.set 2
-@Class2.setlunchbreak2
+@Class2.setlunchbreak3
 D=A
 @SP
 M=M+1
@@ -485,7 +526,7 @@ D=M
 M=D
 @Class2.set
 0;JMP
-(Class2.setlunchbreak2)
+(Class2.setlunchbreak3)
 // 33: pop temp 0
 @SP
 AM=M-1
@@ -493,7 +534,7 @@ D=M
 @R5
 M=D
 // 34: call Class1.get 0
-@Class1.getlunchbreak3
+@Class1.getlunchbreak4
 D=A
 @SP
 M=M+1
@@ -535,9 +576,9 @@ D=M
 M=D
 @Class1.get
 0;JMP
-(Class1.getlunchbreak3)
+(Class1.getlunchbreak4)
 // 35: call Class2.get 0
-@Class2.getlunchbreak4
+@Class2.getlunchbreak5
 D=A
 @SP
 M=M+1
@@ -579,7 +620,7 @@ D=M
 M=D
 @Class2.get
 0;JMP
-(Class2.getlunchbreak4)
+(Class2.getlunchbreak5)
 // 36: label WHILE
 (WHILE)
 // 37: goto WHILE
