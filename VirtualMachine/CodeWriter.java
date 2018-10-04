@@ -546,8 +546,10 @@ public class CodeWriter
         // Push 0 onto local segments parameter numLocals amount of times
         for(int i = 0; i < numLocals; ++i)
         {
+            // Since LCL = SP during start of function, pushing zeroes onto
+            // stack initializes local segment values to 0
+            // and points stack pointer just above local segment
             writePushConstant(0);
-            writePopGeneral(pointerTable.getGeneralSymbol(PointerTable.LOCAL_SEGMENT), i);
         }
     }
     
