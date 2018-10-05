@@ -1,0 +1,498 @@
+class Tetris
+{
+    // Fields
+    field Array grid;
+    field Array activeBlockXPositions;
+    field Array activeBlockYPositions;
+    
+    field int gridHeight;
+    field int gridWidth;
+    field int activePieces;
+    field int invalidPosition;
+    field int blockWidth;
+    field int blockHeight;
+    field boolean hasActive;
+    field boolean flipBlock;
+
+    // Constructor
+    constructor Tetris new()
+    {
+        let gridHeight = 20;
+        let gridWidth = 10;
+        let activePieces = 4;
+        let invalidPosition = -1;
+        let blockWidth = 20;
+        let blockHeight = 10;
+        let hasActive = false;
+        let flipBlock = false;
+        
+        let grid = Array.new(gridHeight);
+        let activeBlockXPositions = Array.new(activePieces);
+        let activeBlockYPositions = Array.new(activePieces);
+    
+        
+    
+        return this;
+    }
+    
+    // Methods
+    
+    method void dispose()
+    {
+        var Array inner;
+        var int index;
+        let index = 0;
+        
+        while(index < gridHeight)
+        {
+            let inner = grid[index];
+            
+            do inner.dispose();
+            
+            let index = index + 1;
+        }
+        
+        do grid.dispose();
+        do Memory.deAlloc(this);
+        
+        return;
+    }
+    
+    method void start()
+    {
+        var Array inner;
+        var char playerInput;
+        var boolean ongoing;
+        var boolean restart;
+        var int tick;
+        var int target;
+        var int waitDuration;
+        var char gravityDirection;
+        var int cooldown;
+        
+        let restart = true;
+        let ongoing = true;
+        let tick = 0;
+        let target = 10;
+        let waitDuration = 100;
+        let gravityDirection = 133;
+        let cooldown = 3000;
+        
+        while(restart)
+        {
+            do initializeGrid();
+            do initializeActiveBlocks();
+            
+            let ongoing = true;
+            let tick = 0;
+            
+            while(ongoing)
+            {
+                let playerInput = Keyboard.keyPressed();
+                
+                do moveActiveBlocks(playerInput);
+                
+                let tick = tick + 1;
+                
+                if(tick > target)
+                {
+                    if(~hasActive)
+                    {
+                        do generateBlocks();
+                    }
+                
+                    let hasActive = moveActiveBlocks(gravityDirection);
+                
+                    if(~hasActive)
+                    {
+                        do deactivateBlocks();
+                    }
+                
+                    let ongoing = checkConditions();
+                
+                    let tick = 1;
+                }
+                
+                do updateScreen();
+                
+                do Sys.wait(waitDuration);
+            }
+            
+            do Sys.wait(cooldown);
+        }
+        
+        return;
+    }
+    
+    method void deactivateBlocks()
+    {
+        var Array inner;
+        var int index;
+        
+        let index = 0;
+        
+        while(index < activePieces)
+        {
+            let inner = grid[activeBlockYPositions[index]];
+            
+            let inner[activeBlockXPositions[index]] = true;
+        
+            let index = index + 1;
+        }
+    
+        return;
+    }
+    
+    method boolean checkConditions()
+    {
+        var Array inner;
+        var int currentBlocks;
+        var int index;
+        var int kndex;
+        
+        let currentBlocks = 0;
+        let index = 0;
+        let kndex = 0;
+        
+        // check for complete lines
+        while(index < gridHeight)
+        {
+            let inner = grid[index];
+        
+            while(kndex < gridWidth)
+            {
+                if(inner[kndex])
+                {
+                    let currentBlocks = currentBlocks + 1;
+                }
+                
+                let kndex = kndex + 1;
+            }
+            
+            if(currentBlocks=gridWidth)
+            {
+                do clearLine(index);
+            }
+            
+            let currentBlocks = 0;
+            let kndex = 0;
+            let index = index + 1;
+        }
+        
+        let index = 0;
+        let inner = grid[0];
+        
+        // check for loss condition
+        while(kndex < gridWidth)
+        {
+            if(inner[kndex])
+            {
+                return false;
+            }
+            
+            let kndex = kndex + 1;
+        }
+        
+        return true;
+    }
+    
+    method void clearLine(int index)
+    {
+        var Array inner;
+        var Array aboveInner;
+        var int kndex;
+    
+        while(index > -1)
+        {
+            let kndex = 0;
+        
+            if(index=0)
+            {
+                let inner = grid[index];
+            
+                while(kndex < gridWidth)
+                {
+                    let inner[kndex] = false;
+                    
+                    let kndex = kndex + 1;
+                }
+            }
+            else
+            {
+                let inner = grid[index];
+                let aboveInner = grid[(index - 1)];
+                
+                while(kndex < gridWidth)
+                {
+                    let inner[kndex] = aboveInner[kndex];
+                    
+                    let kndex = kndex + 1;
+                }
+            }
+            
+            let index = index - 1;
+        }
+        
+        return;
+    }
+    
+    method boolean canMove(char direction)
+    {
+        var Array inner;
+        var int index;
+        
+        let index = 0;
+        
+        if(direction=130) // left
+        {
+            while(index < activePieces)
+            {
+                if(activeBlockXPositions[index] > 0 & activeBlockXPositions[index] < gridWidth & activeBlockYPositions[index] > -1 & activeBlockYPositions[index] < gridHeight)
+                {
+                    let inner = grid[activeBlockYPositions[index]];
+                    
+                    if(inner[activeBlockXPositions[index] - 1])
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            
+                let index = index + 1;
+            }
+            
+            return true;
+        }
+        if(direction=131) // up
+        {
+            return false;
+        }
+        if(direction=132) // right
+        {
+            while(index < activePieces)
+            {
+                if((activeBlockXPositions[index] > -1) & (activeBlockXPositions[index] < (gridWidth - 1)) & (activeBlockYPositions[index] > -1) & (activeBlockYPositions[index] < gridHeight))
+                {
+                    let inner = grid[activeBlockYPositions[index]];
+                    
+                    if(inner[activeBlockXPositions[index] + 1])
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            
+                let index = index + 1;
+            }
+            
+            return true;
+        }
+        if(direction=133) // down
+        {
+            while(index < activePieces)
+            {
+                if(activeBlockXPositions[index] > -1 & activeBlockXPositions[index] < gridWidth & activeBlockYPositions[index] > -1 & activeBlockYPositions[index] < (gridHeight - 1))
+                {
+                    let inner = grid[activeBlockYPositions[index] + 1];
+                    
+                    if(inner[activeBlockXPositions[index]])
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            
+                let index = index + 1;
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    method boolean moveActiveBlocks(char direction)
+    {
+        // left arrow (130), up arrow (131), right arrow (132), down arrow (133)
+        // move left, rotate blocks, move right, move down
+        
+        var int index;
+        let index = 0;
+        
+        if(canMove(direction)=true)
+        {
+            if(direction=130)
+            {
+                while(index < activePieces)
+                {
+                    let activeBlockXPositions[index] = activeBlockXPositions[index] - 1;
+                    
+                    let index = index + 1;
+                }
+                
+                return true;
+            }
+            if(direction=131)
+            {
+                
+            }
+            if(direction=132)
+            {
+                while(index < activePieces)
+                {
+                    let activeBlockXPositions[index] = activeBlockXPositions[index] + 1;
+                    
+                    let index = index + 1;
+                }
+                
+                return true;
+            }
+            if(direction=133)
+            {
+                while(index < activePieces)
+                {
+                    let activeBlockYPositions[index] = activeBlockYPositions[index] + 1;
+                    
+                    let index = index + 1;
+                }
+                
+                return true;
+            }
+        }
+        
+        if(direction=140) // ESC (140)
+        {
+            do Sys.halt();
+            
+            return false;
+        }
+    
+        return false;
+    }
+    
+    method void generateBlocks()
+    {
+        var int index;
+        let index = 0;
+        let hasActive = true;
+        
+        if(flipBlock)
+        {
+            while(index < activePieces)
+            {
+                let activeBlockXPositions[index] = 0;
+                let activeBlockYPositions[index] = index;
+                
+                let index = index + 1;
+            }
+        }
+        else
+        {
+            while(index < activePieces)
+            {
+                let activeBlockXPositions[index] = index;
+                let activeBlockYPositions[index] = 0;
+                
+                let index = index + 1;
+            }
+        }
+        
+        let flipBlock = ~flipBlock;
+        
+        return;
+    }
+    
+    method void updateScreen()
+    {
+        var Array inner;
+        var int yndex;
+        var int xndex;
+        
+        let yndex = 0;
+        let xndex = 0;
+    
+        do Screen.clearScreen();
+        do Screen.setColor(true);
+        
+        while(yndex < gridHeight)
+        {
+            let inner = grid[yndex];
+        
+            while(xndex < gridWidth)
+            {
+                if(inner[xndex])
+                {
+                    do Screen.drawRectangle((xndex * blockWidth) + 4, (yndex * blockHeight) + 2, (xndex + 1) * blockWidth, (yndex + 1)* blockHeight );
+                }
+                
+                let xndex = xndex + 1;
+            }
+            
+            let xndex = 0;
+            let yndex = yndex + 1;
+        }
+        
+        while(xndex < activePieces)
+        {
+            if ((activeBlockXPositions[xndex] > invalidPosition) & (activeBlockYPositions[xndex] > invalidPosition))
+            {
+                do Screen.drawRectangle((activeBlockXPositions[xndex] * blockWidth) + 4, (activeBlockYPositions[xndex] * blockHeight) + 2, (activeBlockXPositions[xndex] + 1) * blockWidth, (activeBlockYPositions[xndex] + 1) * blockHeight);
+            }
+        
+            let xndex = xndex + 1;
+        }
+    
+        return;
+    }
+    
+    method void initializeActiveBlocks()
+    {
+        var int index;
+        let index = 0;
+        
+        while(index < activePieces)
+        {
+            let activeBlockXPositions[index] = invalidPosition;
+            let activeBlockYPositions[index] = invalidPosition;
+            let index = index + 1;
+        }
+    
+        return;
+    }
+    
+    // Causes grid to become a 2 dimensional array[20][10]
+    method void initializeGrid()
+    {
+        var Array inner;
+        var int index;
+        var int kndex;
+        let index = 0;
+        
+        while(index < gridHeight)
+        {
+            let kndex = 0;
+            let inner = Array.new(gridWidth);
+            
+            while(kndex < gridWidth)
+            {
+                let inner[kndex] = false;
+                
+                let kndex = kndex + 1;
+            }
+            
+            let grid[index] = inner;
+            let index = index + 1;
+        }
+        
+        return;
+    }
+}

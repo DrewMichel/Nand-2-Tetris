@@ -1,0 +1,16 @@
+class Main
+{
+    function void main()
+    {
+        var Tetris tetris;
+        
+        let tetris = Tetris.new();
+        
+        do tetris.start();
+        
+        do tetris.dispose();
+
+        return;
+    }
+}
+
