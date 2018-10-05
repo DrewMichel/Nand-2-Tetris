@@ -1,11 +1,13 @@
 class Main
 {
+    // Main static function
     function void main()
     {
         var Tetris tetris;
         
         let tetris = Tetris.new();
         
+        // Calls game start method
         do tetris.start();
         
         do tetris.dispose();

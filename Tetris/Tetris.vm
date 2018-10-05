@@ -69,22 +69,22 @@ push argument 0
 pop pointer 0
 push constant 0
 not
-pop local 3
+pop local 4
 push constant 0
 not
-pop local 2
+pop local 3
 push constant 0
-pop local 4
-push constant 10
 pop local 5
-push constant 100
+push constant 10
 pop local 6
-push constant 133
+push constant 100
 pop local 7
+push constant 133
+pop local 2
 push constant 3000
 pop local 8
 label WHILE_EXP0
-push local 3
+push local 4
 not
 if-goto WHILE_END0
 push pointer 0
@@ -95,11 +95,11 @@ call Tetris.initializeActiveBlocks 1
 pop temp 0
 push constant 0
 not
-pop local 2
+pop local 3
 push constant 0
-pop local 4
+pop local 5
 label WHILE_EXP1
-push local 2
+push local 3
 not
 if-goto WHILE_END1
 call Keyboard.keyPressed 0
@@ -108,12 +108,12 @@ push pointer 0
 push local 1
 call Tetris.moveActiveBlocks 2
 pop temp 0
-push local 4
+push local 5
 push constant 1
 add
-pop local 4
-push local 4
+pop local 5
 push local 5
+push local 6
 gt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -128,7 +128,7 @@ call Tetris.generateBlocks 1
 pop temp 0
 label IF_FALSE1
 push pointer 0
-push local 7
+push local 2
 call Tetris.moveActiveBlocks 2
 pop this 9
 push this 9
@@ -142,14 +142,14 @@ pop temp 0
 label IF_FALSE2
 push pointer 0
 call Tetris.checkConditions 1
-pop local 2
+pop local 3
 push constant 1
-pop local 4
+pop local 5
 label IF_FALSE0
 push pointer 0
 call Tetris.updateScreen 1
 pop temp 0
-push local 6
+push local 7
 call Sys.wait 1
 pop temp 0
 goto WHILE_EXP1

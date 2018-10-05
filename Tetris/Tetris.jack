@@ -30,13 +30,12 @@ class Tetris
         let activeBlockXPositions = Array.new(activePieces);
         let activeBlockYPositions = Array.new(activePieces);
     
-        
-    
         return this;
     }
     
     // Methods
     
+    // Method used to delete allocated object resources
     method void dispose()
     {
         var Array inner;
@@ -58,17 +57,13 @@ class Tetris
         return;
     }
     
+    // Primary game method that drives the tetris game
     method void start()
     {
         var Array inner;
-        var char playerInput;
-        var boolean ongoing;
-        var boolean restart;
-        var int tick;
-        var int target;
-        var int waitDuration;
-        var char gravityDirection;
-        var int cooldown;
+        var char playerInput, gravityDirection;
+        var boolean ongoing, restart;
+        var int tick, target, waitDuration, cooldown;
         
         let restart = true;
         let ongoing = true;
@@ -78,6 +73,7 @@ class Tetris
         let gravityDirection = 133;
         let cooldown = 3000;
         
+        // Outer game loop that restarts the game
         while(restart)
         {
             do initializeGrid();
@@ -86,6 +82,7 @@ class Tetris
             let ongoing = true;
             let tick = 0;
             
+            // Inner game loop that drives the current game
             while(ongoing)
             {
                 let playerInput = Keyboard.keyPressed();
@@ -114,7 +111,6 @@ class Tetris
                 }
                 
                 do updateScreen();
-                
                 do Sys.wait(waitDuration);
             }
             
@@ -124,6 +120,7 @@ class Tetris
         return;
     }
     
+    // Converts active blocks into deactivated blocks inside grid
     method void deactivateBlocks()
     {
         var Array inner;
@@ -134,21 +131,22 @@ class Tetris
         while(index < activePieces)
         {
             let inner = grid[activeBlockYPositions[index]];
-            
             let inner[activeBlockXPositions[index]] = true;
-        
             let index = index + 1;
         }
     
         return;
     }
     
+    // Checks to see if the player has lost or if a
+    // line of blocks has been completed.
+    // If a line of blocks has been completed, removes that line and
+    // drops all blocks down.
+    // The player has lost if the top of the grid contains deactivated blocks.
     method boolean checkConditions()
     {
         var Array inner;
-        var int currentBlocks;
-        var int index;
-        var int kndex;
+        var int currentBlocks, index, kndex;
         
         let currentBlocks = 0;
         let index = 0;
@@ -196,10 +194,11 @@ class Tetris
         return true;
     }
     
+    // Clears the grid starting at index and decrementing index toward
+    // the visual top of the grid
     method void clearLine(int index)
     {
-        var Array inner;
-        var Array aboveInner;
+        var Array inner, aboveInner;
         var int kndex;
     
         while(index > -1)
@@ -236,6 +235,7 @@ class Tetris
         return;
     }
     
+    // Determines if active blocks can move in a given direction
     method boolean canMove(char direction)
     {
         var Array inner;
@@ -320,6 +320,9 @@ class Tetris
         return false;
     }
     
+    // Checks to see if active blocks can move in a given direction via canMove method
+    // then moves in the direction if true
+    // Also handles halting the program via the escape key
     method boolean moveActiveBlocks(char direction)
     {
         // left arrow (130), up arrow (131), right arrow (132), down arrow (133)
@@ -379,6 +382,7 @@ class Tetris
         return false;
     }
     
+    // Alternates between generating horizontal and vertical active blocks
     method void generateBlocks()
     {
         var int index;
@@ -411,11 +415,12 @@ class Tetris
         return;
     }
     
+    // Updates the screen by clearing it then drawing any active
+    // or deactivated blocks
     method void updateScreen()
     {
         var Array inner;
-        var int yndex;
-        var int xndex;
+        var int yndex, xndex;
         
         let yndex = 0;
         let xndex = 0;
@@ -454,6 +459,8 @@ class Tetris
         return;
     }
     
+    // Initializes active blocks elements with invalid positions to
+    // prepare for the generateBlocks method to be called
     method void initializeActiveBlocks()
     {
         var int index;
@@ -469,12 +476,12 @@ class Tetris
         return;
     }
     
-    // Causes grid to become a 2 dimensional array[20][10]
+    // Initializes grid elements with boolean arrays
+    // Causes grid to become a 2 dimensional boolean[20][10] array
     method void initializeGrid()
     {
         var Array inner;
-        var int index;
-        var int kndex;
+        var int index, kndex;
         let index = 0;
         
         while(index < gridHeight)
