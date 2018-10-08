@@ -1,24 +1,52 @@
 // Removes all comments and white space from the input stream and breaks
 // it into Jack-language tokens, as specified by the Jack grammar
 
+import java.io.File;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+
 public class JackTokenizer
 {
+    // Instance variabless
+    private Scanner fileScanner;
+    private String fileName, currentToken, currentKeyWord;
+    private int programCounter;
     
     // Constructors
     
-    // Opens the input filem/stream and gets ready to tokenize it
-    public JackTokenizer()
+    // Opens the input file/stream and gets ready to tokenize it
+    public JackTokenizer(File path)
     {
-        
+        initialize(path);
+    }
+    
+    // Opens the input file/stream and gets ready to tokenize it
+    public JackTokenizer(String path)
+    {
+        initialize(new File(path));
     }
     
     // Methods
+    
+    private void initialize(File path)
+    {
+        try
+        {
+            fileScanner = new Scanner(path);
+            fileName = path.getAbsolutePath();
+            programCounter = 0;
+        }
+        catch(FileNotFoundException e)
+        {
+            System.err.println(e.getMessage());
+        }
+    }
     
     // Returns true if the file has more tokens
     // Otherwise, returns false
     public boolean hasMoreTokens()
     {
-        return false;
+        return fileScanner.hasNext();
     }
     
     // Gets the next token from the input and makes it the current token.
@@ -26,7 +54,7 @@ public class JackTokenizer
     // Initially, there is no current token set.
     public void advance()
     {
-        
+        currentToken = fileScanner.next();
     }
     
     // TODO: Decide on token type
@@ -37,7 +65,6 @@ public class JackTokenizer
         
     }
     */
-    
     
     // TODO: Decide on token keyword type
     /*
