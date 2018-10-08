@@ -1,10 +1,12 @@
 // LEXICAL ELEMENTS:
 //
+//    The Jack language includes five types of terminal elements (tokens):
+//
 //    1. KEYWORDS:
 //
-//          class, constructor, function, method, field, static, var, int,
-//          char, boolean, void, true, false, null, this, let, do, if,
-//          else, while, return
+//          'class', 'constructor', 'function', 'method', 'field', 'static',
+//          'var', 'int', 'char', 'boolean', 'void', 'true', 'false', 'null',
+//          'this', 'let', 'do', 'if', 'else', 'while', 'return'
 //
 //    2. SYMBOLS:
 //
@@ -24,7 +26,75 @@
 //
 //          A sequence of letters, digits, and underscore ('_') not
 //          starting with a digit.
+//
+// PROGRAM STRUCTURE:
+//
+//    A Jack program is a collection of classes, each appearing in a
+//    separate file. The compilation unit is a class. A class is a sequence of
+//    tokens structured according to the following context free syntax:
+//
+//    1. CLASS: 'class' className '{' classVarDec* subroutineDec* '}'
+//
+//    2. CLASS VAR DEC: ('static' or 'field') type varName (',' varName)* ';'
+//
+//    3. TYPE: 'int' or 'char' or 'boolean' or className
+//
+//    4. SUBROUTINE DEC: ('constructor' or 'function' or 'method')
+//                       ('void' or type) subroutineName '(' parameterList ')'
+//                       subroutineBody
+//
+//    5. PARAMETER LIST: ((type varName) (',' type varName)*)?
+//
+//    6. SUBROUTINE BODY: '{' varDec* statements '}'
+//
+//    7. VAR DEC: 'var' type varName (',' varName)* ';'
+//
+//    8. CLASS NAME: identifier
+//
+//    9. SUBROUTINE NAME: identifier
+//
+//    10. VAR NAME: identifier
+//
+// STATEMENTS:
+//
+//    1. STATEMENTS: statement*
+//
+//    2. STATEMENT: letStatement or ifStatement or whileStatement
+//                  or doStatement or returnStatement
+//
+//    3. LET STATEMENT: 'let' varName ('[' expression ']')? '=' expression ';'
+//
+//    4. IF STATEMENT: 'if '(' expression ')' '{' statements '}'
+//                     ('else' '{' statements '}')?
+//
+//    5. WHILE STATEMENT: 'while' '(' expression ')' '{' statements '}'
+//
+//    6. DO STATEMENT: 'do' subroutineCall ';'
+//
+//    7. RETURN STATEMENT: 'return' expression? ';'
+//
+// EXPRESSIONS:
+//
+//    1. EXPRESSION: term (op term)*
+//
+//    2. TERM: integerConstant or stringConstant or keywordConstant or varName
+//             or varName '[' expression ']' or subroutineCall
+//             or '(' expression ')' unaryOp term
+//
+//    3. SUBROUTINE CALL: subroutineName '(' expressionList ')'
+//                        or (className or varName) '.' subroutineName
+//                        '(' expressionList ')'
+//
+//    4. EXPRESSION LIST: (expression(',' expression)*)?
+//
+//    5. OP: '+' or '-' or '*' or '/' or '&' or '|' or '<' or '>' or '='
+//
+//    6. UNARY OP: '-' or '~'
+//
+//    7. KEYWORD CONSTANT: 'true' or 'false' or 'null' or 'this'
+
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class TokenTable
 {
@@ -32,8 +102,7 @@ public class TokenTable
     public static final String KEYWORD = "keyword", SYMBOL = "symbol",
                                IDENTIFIER = "identifier",
                                INT_CONST = "integerConstant",
-                               STRING_CONST = "stringConstant",
-                               INVALID_TOKEN = "invalidToken";
+                               STRING_CONST = "stringConstant";
                                
     // Key words
     public static final String CLASS = "class", METHOD = "method",
@@ -55,18 +124,56 @@ public class TokenTable
                                SLASH = "/", AMPERSAND = "&", PIPE = "|",
                                LEFT_CHEVRON = "<", RIGHT_CHEVRON = ">",
                                EQUAL = "=", TILDE = "~";
+                               
+    // Identifier character
+    public static final String UNDERSCORE = "_";
+    
+    // String constant beginning and end character
+    public static final String DOUBLE_QUOTE = "\"";
+    
+    // String flags
+    public static final String INVALID_TOKEN = "invalidToken",
+                               UNARY_OPERATOR = "unaryOperator",
+                               OPERATOR = "operator",
+                               MULTI_OPERATOR = "multiOperator";
     
     // Instance variables
     private HashMap<String, String> keyWordMap, symbolMap;
+    private HashSet<String> operatorSet, unaryOperatorSet;
     
     // Constructors
     public TokenTable()
     {
         initializeKeyWordMap();
         initializeSymbolMap();
+        initializeOperatorSet();
+        initializeUnaryOperatorSet();
     }
     
     // Methods
+    
+    private void initializeUnaryOperatorSet()
+    {
+        unaryOperatorSet = new HashSet<String>();
+        
+        unaryOperatorSet.add(DASH);
+        unaryOperatorSet.add(TILDE);
+    }
+    
+    private void initializeOperatorSet()
+    {
+        operatorSet = new HashSet<String>();
+        
+        operatorSet.add(PLUS);
+        operatorSet.add(DASH);
+        operatorSet.add(ASTERISK);
+        operatorSet.add(SLASH);
+        operatorSet.add(AMPERSAND);
+        operatorSet.add(PIPE);
+        operatorSet.add(LEFT_CHEVRON);
+        operatorSet.add(RIGHT_CHEVRON);
+        operatorSet.add(EQUAL);
+    }
     
     private void initializeSymbolMap()
     {
@@ -127,6 +234,8 @@ public class TokenTable
     
     public String get(String key)
     {
+        boolean isOperator, isUnaryOperator;
+        
         if(isSymbol(key))
         {
             return getSymbol(key);
@@ -159,5 +268,77 @@ public class TokenTable
     public String getKeyWord(String key)
     {
         return keyWordMap.get(key);
+    }
+    
+    public boolean isOperator(String key)
+    {
+        return operatorSet.contains(key);
+    }
+    
+    public boolean isUnaryOperator(String key)
+    {
+        return unaryOperatorSet.contains(key);
+    }
+    
+    public static boolean isIntegerConstant(String value)
+    {
+        int length = 0;
+        
+        if(value == null || (length = value.length()) < 1)
+        {
+            return false;
+        }
+        
+        for(int i = 0; i < length; ++i)
+        {
+            if(!Character.isDigit(value.charAt(i)))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    public static boolean isIdentifier(String value)
+    {
+        int length = 0;
+        char current;
+        
+        if(value == null || (length = value.length()) < 1)
+        {
+            return false;
+        }
+        
+        current = value.charAt(0);
+        
+        if(!Character.isAlphabetic(current) && current != UNDERSCORE.charAt(0))
+        {
+            return false;
+        }
+        
+        for(int i = 1; i < length; ++i)
+        {
+            current = value.charAt(i);
+            
+            if(!Character.isAlphabetic(current) && current != UNDERSCORE.charAt(0) && !Character.isDigit(current))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    public static boolean isStringConstant(String value)
+    {
+        int length;
+        
+        if(value == null || (length = value.length()) < 2)
+        {
+            return false;
+        }
+        
+        return value.charAt(0) == DOUBLE_QUOTE.charAt(0) && value.charAt(length - 1) == DOUBLE_QUOTE.charAt(0);
     }
 }
