@@ -95,6 +95,7 @@
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.io.File;
 
 public class TokenTable
 {
@@ -131,6 +132,9 @@ public class TokenTable
     // String constant beginning and end character
     public static final String DOUBLE_QUOTE = "\"";
     
+    // XML acceptable characters
+    public static final String XML_LESSER = "&lt;", XML_GREATER = "&gt;", XML_QUOTE = "&quot;", XML_AND = "&amp;";
+    
     // String flags
     public static final String INVALID_TOKEN = "invalidToken",
                                UNARY_OPERATOR = "unaryOperator",
@@ -138,7 +142,7 @@ public class TokenTable
                                MULTI_OPERATOR = "multiOperator";
     
     // Instance variables
-    private HashMap<String, String> keyWordMap, symbolMap;
+    private HashMap<String, String> keyWordMap, symbolMap, modifiedMap;
     private HashSet<String> operatorSet, unaryOperatorSet;
     
     // Constructors
@@ -148,6 +152,7 @@ public class TokenTable
         initializeSymbolMap();
         initializeOperatorSet();
         initializeUnaryOperatorSet();
+        initializeModifiedMap();
     }
     
     // Methods
@@ -158,6 +163,16 @@ public class TokenTable
         
         unaryOperatorSet.add(DASH);
         unaryOperatorSet.add(TILDE);
+    }
+    
+    private void initializeModifiedMap()
+    {
+        modifiedMap = new HashMap<String, String>();
+        
+        modifiedMap.put(LEFT_CHEVRON, XML_LESSER);
+        modifiedMap.put(RIGHT_CHEVRON, XML_GREATER);
+        modifiedMap.put(DOUBLE_QUOTE, XML_QUOTE);
+        modifiedMap.put(AMPERSAND, XML_AND);
     }
     
     private void initializeOperatorSet()
@@ -232,17 +247,37 @@ public class TokenTable
         return isSymbol(key) | isKeyWord(key);
     }
     
+    public boolean needsModification(String key)
+    {
+        return modifiedMap.containsKey(key);
+    }
+    
+    public String getModification(String key)
+    {
+        return modifiedMap.get(key);
+    }
+    
     public String get(String key)
     {
-        boolean isOperator, isUnaryOperator;
-        
         if(isSymbol(key))
-        {
+        {           
             return getSymbol(key);
         }
         else if(isKeyWord(key))
         {
             return getKeyWord(key);
+        }
+        else if(isIntegerConstant(key))
+        {
+            return INT_CONST;
+        }
+        else if(isStringConstant(key))
+        {
+            return STRING_CONST;
+        }
+        else if(isIdentifier(key))
+        {
+            return IDENTIFIER;
         }
         else
         {
@@ -340,5 +375,42 @@ public class TokenTable
         }
         
         return value.charAt(0) == DOUBLE_QUOTE.charAt(0) && value.charAt(length - 1) == DOUBLE_QUOTE.charAt(0);
+    }
+    
+    public static String adjustExtension(String path, String extension)
+    {
+        int length = 0;
+        char current;
+        
+        if(path == null || (length = path.length()) < 1)
+        {
+            return path;
+        }
+        
+        StringBuilder builder = new StringBuilder(length);
+        
+        for(int i = 0; i < length; ++i)
+        {
+            current = path.charAt(i);
+            
+            if(current == PERIOD.charAt(0))
+            {
+                builder.append(extension);
+                return builder.toString();
+            }
+            else
+            {
+                builder.append(current);
+            }
+        }
+        
+        if(builder.length() > 0 && builder.charAt(builder.length() - 1) == File.separator.charAt(0))
+        {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        
+        builder.append(extension);
+        
+        return builder.toString();
     }
 }
